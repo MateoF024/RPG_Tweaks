@@ -1,0 +1,17 @@
+{
+  "config.ka_core.title": "RPG Tweaks Configuration",
+
+  "config.ka_core.category.experience": "Experience & Progression",
+
+  "config.ka_core.blockAdvancementXP": "Block Advancement XP",
+  "config.ka_core.blockAdvancementXP.tooltip": "When enabled, players will not receive experience from completing advancements.",
+
+  "config.ka_core.logXPBlocking": "Log XP Blocking (Debug)",
+  "config.ka_core.logXPBlocking.tooltip": "Logs detailed information about XP blocking to the console.",
+
+  "config.ka_core.enableCustomOreXP": "Enable Custom Ore XP",
+  "config.ka_core.enableCustomOreXP.tooltip": "Enables the custom ore XP system. Configured blocks will drop custom XP amounts.",
+
+  "config.ka_core.logOreXP": "Log Ore XP (Debug)",
+  "config.ka_core.logOreXP.tooltip": "Logs detailed information about ore XP drops to the console."
+}

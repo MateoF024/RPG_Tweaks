@@ -1,0 +1,120 @@
+package org.mateof24.rpg_tweaks.config;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.mojang.logging.LogUtils;
+import net.neoforged.fml.loading.FMLPaths;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+
+public class ModConfig {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("ka_core.json");
+
+    private static ModConfig INSTANCE;
+
+    public boolean blockAdvancementXP = true;
+    public boolean logXPBlocking = false;
+
+    public boolean enableCustomOreXP = true;
+    public boolean logOreXP = false;
+    public OreXPConfig oreXPConfig = new OreXPConfig();
+
+    public static ModConfig getInstance() {
+        if (INSTANCE == null) {
+            load();
+        }
+        return INSTANCE;
+    }
+
+    private void initializeDefaultOreXP() {
+        if (oreXPConfig == null) {
+            oreXPConfig = new OreXPConfig();
+        }
+
+        if (oreXPConfig.blockConfigs.isEmpty() && oreXPConfig.tagConfigs.isEmpty()) {
+
+            // Coal
+            oreXPConfig.tagConfigs.put("minecraft:coal_ores", new OreXPConfig.OreXPValues(1, 3));
+
+            // Copper
+            oreXPConfig.tagConfigs.put("minecraft:copper_ores", new OreXPConfig.OreXPValues(1, 3));
+
+            // Iron
+            oreXPConfig.tagConfigs.put("minecraft:iron_ores", new OreXPConfig.OreXPValues(2, 4));
+
+            // Gold
+            oreXPConfig.tagConfigs.put("minecraft:gold_ores", new OreXPConfig.OreXPValues(2, 5));
+
+            // Redstone
+            oreXPConfig.tagConfigs.put("minecraft:redstone_ores", new OreXPConfig.OreXPValues(3, 7));
+
+            // Lapis
+            oreXPConfig.tagConfigs.put("minecraft:lapis_ores", new OreXPConfig.OreXPValues(4, 8));
+
+            // Diamond
+            oreXPConfig.tagConfigs.put("minecraft:diamond_ores", new OreXPConfig.OreXPValues(5, 12));
+
+            // Emerald
+            oreXPConfig.tagConfigs.put("minecraft:emerald_ores", new OreXPConfig.OreXPValues(5, 12));
+
+            // Quartz
+            oreXPConfig.blockConfigs.put("minecraft:nether_quartz_ore", new OreXPConfig.OreXPValues(7, 15));
+
+            LOGGER.info("Default mineral configuration initialized with tags");
+        }
+    }
+
+    public static void load() {
+        if (Files.exists(CONFIG_PATH)) {
+            try {
+                String json = Files.readString(CONFIG_PATH);
+                INSTANCE = GSON.fromJson(json, ModConfig.class);
+                LOGGER.info("Configuration loaded from: {}", CONFIG_PATH);
+
+                INSTANCE.validate();
+
+                INSTANCE.initializeDefaultOreXP();
+            } catch (Exception e) {
+                LOGGER.error("Error loading configuration, using default values.", e);
+                INSTANCE = new ModConfig();
+                INSTANCE.initializeDefaultOreXP();
+                save();
+            }
+        } else {
+            LOGGER.info("Configuration file not found, creating a new one with default values.");
+            INSTANCE = new ModConfig();
+            INSTANCE.initializeDefaultOreXP();
+            save();
+        }
+    }
+
+    public static void save() {
+        try {
+            Files.createDirectories(CONFIG_PATH.getParent());
+
+            String json = GSON.toJson(INSTANCE);
+            Files.writeString(CONFIG_PATH, json);
+
+            LOGGER.info("Configuration saved in: {}", CONFIG_PATH);
+        } catch (IOException e) {
+            LOGGER.error("Error saving configuration.", e);
+        }
+    }
+
+    private void validate() {
+        if (oreXPConfig != null) {
+            oreXPConfig.validate();
+        }
+    }
+
+    public static void reload() {
+        LOGGER.info("Reloading settings...");
+        load();
+    }
+}
