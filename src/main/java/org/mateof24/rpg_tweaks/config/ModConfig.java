@@ -14,16 +14,29 @@ import java.nio.file.Path;
 public class ModConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("ka_core.json");
+    private static final Path CONFIG_PATH = FMLPaths.CONFIGDIR.get().resolve("rpg_tweaks.json");
 
     private static ModConfig INSTANCE;
 
     public boolean blockAdvancementXP = true;
     public boolean logXPBlocking = false;
+    public int advancementXPReward = 0;
 
     public boolean enableCustomOreXP = true;
     public boolean logOreXP = false;
     public OreXPConfig oreXPConfig = new OreXPConfig();
+
+    public float exhaustionRateMultiplier = 1.0f;
+    public float naturalRegenRateMultiplier = 1.0f;
+    public float durabilityMultiplier = 0f;
+    public int maxStorableXP = 0;
+
+    public int sleepFromNight = 0;
+    public float sleepHealPercent = 0f;
+    public int sleepHungerPoints = 0;
+    public float sleepHungerChance = 0f;
+
+    public boolean pvpEnabled = true;
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {

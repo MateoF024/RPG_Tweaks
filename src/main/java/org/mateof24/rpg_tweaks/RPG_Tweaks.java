@@ -12,7 +12,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import org.mateof24.rpg_tweaks.command.ReloadCommand;
+import org.mateof24.rpg_tweaks.command.RPGCommands;
 import org.mateof24.rpg_tweaks.config.ModConfig;
 import org.mateof24.rpg_tweaks.config.ModConfigScreen;
 import org.mateof24.rpg_tweaks.integration.ReskillableCommands;
@@ -99,7 +99,7 @@ public class RPG_Tweaks {
         public static void onCommandsRegister(RegisterCommandsEvent event) {
             LOGGER.info("Registering RPG Tweaks commands...");
 
-            ReloadCommand.register(event.getDispatcher());
+            RPGCommands.register(event.getDispatcher());
 
             if (ReskillableConfigManager.isReskillableInstalled()) {
                 ReskillableCommands.register(event.getDispatcher());
@@ -113,7 +113,7 @@ public class RPG_Tweaks {
         }
     }
 
-    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static class ClientModEvents {
 
         @SubscribeEvent

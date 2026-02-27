@@ -35,6 +35,22 @@ public class ModConfigScreen {
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
 
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.literal("Advancement XP Reward"))
+                                .description(OptionDescription.of(
+                                        Component.literal("XP granted when completing an advancement (0 = none).")
+                                ))
+                                .binding(
+                                        0,
+                                        () -> config.advancementXPReward,
+                                        value -> config.advancementXPReward = value
+                                )
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 1000)
+                                        .step(1)
+                                        .formatValue(v -> Component.literal(v + " XP").withStyle(ChatFormatting.GOLD)))
+                                .build())
+
                         .option(Option.<Boolean>createBuilder()
                                 .name(Component.literal("Log XP Blocking").withStyle(ChatFormatting.GRAY))
                                 .description(OptionDescription.of(
@@ -93,6 +109,137 @@ public class ModConfigScreen {
                                 .build())
 
                         .groups(createOreGroups(config))
+
+                        .build())
+
+                .category(ConfigCategory.createBuilder()
+                        .name(Component.literal("⚡ Player Mechanics").withStyle(ChatFormatting.GREEN))
+                        .tooltip(Component.literal("Modify base player mechanics"))
+
+                        .option(Option.<Float>createBuilder()
+                                .name(Component.literal("Exhaustion Rate Multiplier"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Multiplies the exhaustion gained from actions. 1.0 = vanilla.")
+                                ))
+                                .binding(1.0f, () -> config.exhaustionRateMultiplier, value -> config.exhaustionRateMultiplier = value)
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                        .range(0.0f, 5.0f)
+                                        .step(0.1f)
+                                        .formatValue(v -> Component.literal(String.format("%.1fx", v)).withStyle(ChatFormatting.YELLOW)))
+                                .build())
+
+                        .option(Option.<Float>createBuilder()
+                                .name(Component.literal("Natural Regen Rate Multiplier"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Multiplies natural HP regeneration from food. 1.0 = vanilla.")
+                                ))
+                                .binding(1.0f, () -> config.naturalRegenRateMultiplier, value -> config.naturalRegenRateMultiplier = value)
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                        .range(0.0f, 5.0f)
+                                        .step(0.1f)
+                                        .formatValue(v -> Component.literal(String.format("%.1fx", v)).withStyle(ChatFormatting.YELLOW)))
+                                .build())
+
+                        .option(Option.<Float>createBuilder()
+                                .name(Component.literal("Durability Multiplier"))
+                                .description(OptionDescription.of(
+                                        Component.literal("-1 = no durability loss | 0 = vanilla | >0 = damage multiplier")
+                                ))
+                                .binding(0f, () -> config.durabilityMultiplier, value -> config.durabilityMultiplier = value)
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                        .range(-1.0f, 5.0f)
+                                        .step(0.1f)
+                                        .formatValue(v -> {
+                                            if (v == -1f) return Component.literal("No loss").withStyle(ChatFormatting.GREEN);
+                                            if (v == 0f) return Component.literal("Vanilla").withStyle(ChatFormatting.GRAY);
+                                            return Component.literal(String.format("%.1fx", v)).withStyle(ChatFormatting.YELLOW);
+                                        }))
+                                .build())
+
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.literal("Max Storable XP"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Maximum total XP a player can accumulate. 0 = unlimited.")
+                                ))
+                                .binding(0, () -> config.maxStorableXP, value -> config.maxStorableXP = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 100000)
+                                        .step(100)
+                                        .formatValue(v -> v == 0
+                                                ? Component.literal("Unlimited").withStyle(ChatFormatting.GREEN)
+                                                : Component.literal(v + " XP").withStyle(ChatFormatting.YELLOW)))
+                                .build())
+
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Component.literal("PvP Enabled"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Allow players to damage each other.")
+                                ))
+                                .binding(true, () -> config.pvpEnabled, value -> config.pvpEnabled = value)
+                                .controller(TickBoxControllerBuilder::create)
+                                .build())
+
+                        .build())
+
+                .category(ConfigCategory.createBuilder()
+                        .name(Component.literal("🌙 Sleep").withStyle(ChatFormatting.BLUE))
+                        .tooltip(Component.literal("Configure sleep-related mechanics"))
+
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.literal("Sleep From Night"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Minimum night number to allow sleeping. 0 = always allowed.")
+                                ))
+                                .binding(0, () -> config.sleepFromNight, value -> config.sleepFromNight = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 100)
+                                        .step(1)
+                                        .formatValue(v -> v == 0
+                                                ? Component.literal("Always").withStyle(ChatFormatting.GREEN)
+                                                : Component.literal("Night " + v).withStyle(ChatFormatting.YELLOW)))
+                                .build())
+
+                        .option(Option.<Float>createBuilder()
+                                .name(Component.literal("Sleep Heal Percent"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Percentage of max HP restored after sleeping. 0 = disabled.")
+                                ))
+                                .binding(0f, () -> config.sleepHealPercent, value -> config.sleepHealPercent = value)
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                        .range(0f, 100f)
+                                        .step(1f)
+                                        .formatValue(v -> v == 0f
+                                                ? Component.literal("Disabled").withStyle(ChatFormatting.GRAY)
+                                                : Component.literal(String.format("%.0f%%", v)).withStyle(ChatFormatting.GREEN)))
+                                .build())
+
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.literal("Sleep Hunger Loss"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Food points removed after sleeping. 0 = disabled.")
+                                ))
+                                .binding(0, () -> config.sleepHungerPoints, value -> config.sleepHungerPoints = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 20)
+                                        .step(1)
+                                        .formatValue(v -> v == 0
+                                                ? Component.literal("Disabled").withStyle(ChatFormatting.GRAY)
+                                                : Component.literal(v + " points").withStyle(ChatFormatting.YELLOW)))
+                                .build())
+
+                        .option(Option.<Float>createBuilder()
+                                .name(Component.literal("Sleep Hunger Chance"))
+                                .description(OptionDescription.of(
+                                        Component.literal("Chance (%) that hunger loss triggers after sleeping.")
+                                ))
+                                .binding(0f, () -> config.sleepHungerChance, value -> config.sleepHungerChance = value)
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                        .range(0f, 100f)
+                                        .step(1f)
+                                        .formatValue(v -> v == 0f
+                                                ? Component.literal("Disabled").withStyle(ChatFormatting.GRAY)
+                                                : Component.literal(String.format("%.0f%%", v)).withStyle(ChatFormatting.GREEN)))
+                                .build())
 
                         .build())
 

@@ -43,6 +43,10 @@ public class OreXPHandler {
             return;
         }
 
+        if (player.gameMode.getGameModeForPlayer() != net.minecraft.world.level.GameType.SURVIVAL) {
+            return;
+        }
+
         ServerLevel serverLevel = (ServerLevel) level;
         BlockState blockState = event.getState();
         Block block = blockState.getBlock();

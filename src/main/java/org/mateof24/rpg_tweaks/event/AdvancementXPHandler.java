@@ -69,6 +69,11 @@ public class AdvancementXPHandler {
         player.experienceProgress = snapshot.progress;
         player.totalExperience = snapshot.totalXP;
 
+        int reward = ModConfig.getInstance().advancementXPReward;
+        if (reward > 0) {
+            player.giveExperiencePoints(reward);
+        }
+
         player.connection.send(
                 new net.minecraft.network.protocol.game.ClientboundSetExperiencePacket(
                         player.experienceProgress,

@@ -1,12 +1,13 @@
 # RPG-Tweaks
 
-RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1 that adds functionality for RPG servers/modpacks.
+RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality for RPG servers/modpacks.
 
 ## 🚀 Features
 
 #### **Advancement XP Blocking**
 - Prevents players from gaining experience when completing achievements (advancements)
-- Configurable with optional debug logs
+- Configurable custom XP reward per advancement (0 = no XP, as before)
+- Optional debug logs
 
 #### **Award Custom XP When Mining Mineral Blocks**
 - Award experience orbs (points) when mining ores.
@@ -14,7 +15,19 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1 that adds functionality for RP
 - Experience is calculated between a minimum and maximum value, awarding the amount randomly.
 - Optional debug logs.
 
-## 🔌 Integrations and Compatibility with other mods
+#### **Player Mechanics**
+- **Exhaustion Rate:** Multiplier for hunger exhaustion gained from actions (1.0 = vanilla).
+- **Natural Regen Rate:** Multiplier for HP regeneration from food (1.0 = vanilla).
+- **Durability Multiplier:** Controls tool and armor wear. `-1` = no durability loss, `0` = vanilla, `>0` = damage multiplier.
+- **Max Storable XP:** Cap on total experience a player can accumulate (0 = unlimited).
+- **PvP Toggle:** Enable or disable player-vs-player damage via config or command.
+
+#### **Sleep Mechanics**
+- **Sleep From Night:** Minimum in-game night before players are allowed to sleep (0 = always).
+- **Sleep Heal:** Restore a configurable percentage of max HP after sleeping (0 = disabled).
+- **Sleep Hunger Loss:** Reduce food level after sleeping by a set number of points, with a configurable probability (0 = disabled).
+
+## 🔌 Integrations and Compatibility with other mods (ONLY 1.21.1)
 
 > **Optional integrations:** The following integrations are only available when the respective mod is installed.  
 > RPG-Tweaks does **not** bundle, redistribute, or modify these mods.
@@ -28,15 +41,25 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1 that adds functionality for RP
 - New command: `/rpg_tweaks banitem/unbanitem` — Adds or removes an item from the mod's ban list.
 - The item can be specified, or it will automatically use the item held in the main hand.
 
+## 🖥️ Commands
+
+| Command | Permission | Description |
+|---|---|---|
+| `/rpg_tweaks reload` | OP 2 | Reloads the mod configuration |
+| `/rpg_tweaks pvp on\|off` | OP 2 | Enables or disables PvP |
+| `/rpg_tweaks skills add/remove/info` | OP 2 | Manage Reskillable skill locks |
+| `/rpg_tweaks craftskills add/remove/info` | OP 2 | Manage Reskillable craft locks |
+| `/rpg_tweaks banitem/unbanitem` | OP 2 | Manage Item Obliterator blacklist |
+
 ## 📦 Dependencies
 
 ### Required
-- **Minecraft**: 1.21.1
+- **Minecraft**: 1.21.1-1.21.8
 - **NeoForge**: 21.1.219+
-- **YetAnotherConfigLib**: 3.8.2+1.21.1-neoforge
+- **YetAnotherConfigLib**: 3.8.2+1.21.1-neoforge+
 - **Java**: 21
 
-### Optional (for integrations)
+### Optional (for integrations)(ONLY 1.21.1)
 - **Reskillable Reimagined** (only required to use the Reskillable-related commands/integration)
 - **Item Obliterator** (only required to use the banitem/unbanitem commands/integration)
 
