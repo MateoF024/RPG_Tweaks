@@ -102,19 +102,15 @@ public class ReskillableCommands {
         CommandSourceStack source = context.getSource();
 
         if (!(source.getEntity() instanceof ServerPlayer player)) {
-            throw new CommandSyntaxException(
-                    null,
-                    Component.literal("Only players can use this command without specifying an item.")
-            );
+            throw new CommandSyntaxException(null,
+                    Component.translatable("rpg_tweaks.command.error.players_only"));
         }
 
         ItemStack heldItem = player.getMainHandItem();
 
         if (heldItem.isEmpty()) {
-            throw new CommandSyntaxException(
-                    null,
-                    Component.literal("You must either hold an item in your hand or specify an item in the command.")
-            );
+            throw new CommandSyntaxException(null,
+                    Component.translatable("rpg_tweaks.command.error.hand_empty"));
         }
 
         ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(heldItem.getItem());
@@ -123,33 +119,30 @@ public class ReskillableCommands {
 
     private static int executeAdd(CommandContext<CommandSourceStack> context, ConfigType type) {
         String fullInput = StringArgumentType.getString(context, "requirements");
-        return processAddCommand(context.getSource(), fullInput, type, "skill lock", context);
+        return processAddCommand(context.getSource(), fullInput, type, context);
     }
 
     private static int executeCraftAdd(CommandContext<CommandSourceStack> context, ConfigType type) {
         String fullInput = StringArgumentType.getString(context, "requirements");
-        return processAddCommand(context.getSource(), fullInput, type, "craft lock", context);
+        return processAddCommand(context.getSource(), fullInput, type, context);
     }
 
     private static int processAddCommand(CommandSourceStack source, String fullInput,
-                                         ConfigType type, String lockTypeName,
+                                         ConfigType type,
                                          CommandContext<CommandSourceStack> context) {
         try {
             if (!ReskillableConfigManager.isReskillableInstalled()) {
-                source.sendFailure(Component.literal("§cError: Reskillable Reimagined is not installed or its configuration directory could not be found."));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed"));
                 return 0;
             }
 
             String[] parts = fullInput.trim().split("\\s+");
 
             if (parts.length < 2) {
-                source.sendFailure(Component.literal(
-                        "§cIncorrect usage. Format: /rpg_tweaks " +
-                                (type == ConfigType.CRAFT_LOCKS ? "craftskills" : "skills") +
-                                " add <skill> <level> [<skill> <level> ...] [<item>]"
-                ));
-                source.sendFailure(Component.literal("§eExample: /rpg_tweaks skills add attack 15 agility 10 minecraft:diamond_sword"));
-                source.sendFailure(Component.literal("§eOr without an item (use the one in your hand): /rpg_tweaks skills add attack 15 agility 10"));
+                String subCmd = type == ConfigType.CRAFT_LOCKS ? "craftskills" : "skills";
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.usage.add", subCmd));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.usage.example_full"));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.usage.example_hand"));
                 return 0;
             }
 
@@ -164,15 +157,15 @@ public class ReskillableCommands {
             if (itemId == null) {
                 try {
                     if (!(source.getEntity() instanceof ServerPlayer player)) {
-                        source.sendFailure(Component.literal("§cYou must specify an item or be a player to use the item in your hand"));
+                        source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.need_player"));
                         return 0;
                     }
 
                     ItemStack heldItem = player.getMainHandItem();
 
                     if (heldItem.isEmpty()) {
-                        source.sendFailure(Component.literal("§cYou must either hold an item in your hand or specify an item in the command"));
-                        source.sendFailure(Component.literal("§eExample: /rpg_tweaks skills add attack 15 minecraft:diamond_sword"));
+                        source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.hand_empty"));
+                        source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.hand_example"));
                         return 0;
                     }
 
@@ -180,14 +173,14 @@ public class ReskillableCommands {
                     itemId = itemIdRes.toString();
 
                 } catch (Exception e) {
-                    source.sendFailure(Component.literal("§cError getting the item from your hand: " + e.getMessage()));
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.hand_get_error", e.getMessage()));
                     return 0;
                 }
             }
 
             if (!ReskillableConfigManager.isValidItemId(itemId)) {
-                source.sendFailure(Component.literal("§cInvalid item format: " + itemId));
-                source.sendFailure(Component.literal("§eCorrect format: modid:itemname (Example: minecraft:diamond_sword)"));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", itemId));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.item_format_hint"));
                 return 0;
             }
 
@@ -195,7 +188,7 @@ public class ReskillableCommands {
 
             for (int i = 0; i < endIndex; i += 2) {
                 if (i + 1 >= endIndex) {
-                    source.sendFailure(Component.literal("§cError: Skill with no specified level near '" + parts[i] + "'"));
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.skill_no_level", parts[i]));
                     return 0;
                 }
 
@@ -203,8 +196,8 @@ public class ReskillableCommands {
                 String levelStr = parts[i + 1];
 
                 if (!VALID_SKILLS.contains(skill)) {
-                    source.sendFailure(Component.literal("§cInvalid skill: " + skill));
-                    source.sendFailure(Component.literal("§eValid skills: " + String.join(", ", VALID_SKILLS)));
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_skill", skill));
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.valid_skills", String.join(", ", VALID_SKILLS)));
                     return 0;
                 }
 
@@ -212,11 +205,11 @@ public class ReskillableCommands {
                 try {
                     level = Integer.parseInt(levelStr);
                     if (level <= 0 || level > 100) {
-                        source.sendFailure(Component.literal("§cInvalid level: " + level + " (Must be integer between 1 and 100)"));
+                        source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_level_range", level));
                         return 0;
                     }
                 } catch (NumberFormatException e) {
-                    source.sendFailure(Component.literal("§cInvalid level: '" + levelStr + "' is not a number."));
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_level_nan", levelStr));
                     return 0;
                 }
 
@@ -224,7 +217,7 @@ public class ReskillableCommands {
             }
 
             if (skillRequirements.isEmpty()) {
-                source.sendFailure(Component.literal("§cYou must specify at least one skill requirement."));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.no_requirements"));
                 return 0;
             }
 
@@ -232,26 +225,18 @@ public class ReskillableCommands {
 
             if (success) {
                 final String finalItemId = itemId;
-                source.sendSuccess(
-                        () -> Component.literal("§a✓ Item successfully added to " + type.filename),
-                        true
-                );
-                source.sendSuccess(
-                        () -> Component.literal("§7Item: §f" + finalItemId),
-                        false
-                );
-                source.sendSuccess(
-                        () -> Component.literal("§7Requirements: §f" + String.join(", ", skillRequirements)),
-                        false
-                );
+                final List<String> finalReqs = skillRequirements;
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.added", type.filename), true);
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", finalItemId), false);
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements", String.join(", ", finalReqs)), false);
                 return 1;
             } else {
-                source.sendFailure(Component.literal("§cError adding item. Check the logs for details."));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.add_failed"));
                 return 0;
             }
 
         } catch (Exception e) {
-            source.sendFailure(Component.literal("§cUnexpected error: " + e.getMessage()));
+            source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.unexpected", e.getMessage()));
             e.printStackTrace();
             return 0;
         }
@@ -262,14 +247,14 @@ public class ReskillableCommands {
 
         try {
             if (!ReskillableConfigManager.isReskillableInstalled()) {
-                source.sendFailure(Component.literal("§cError: Reskillable Reimagined is not installed."));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed_short"));
                 return 0;
             }
 
             String itemId = getItemId(context, hasItemArg);
 
             if (!ReskillableConfigManager.isValidItemId(itemId)) {
-                source.sendFailure(Component.literal("§cInvalid item format: " + itemId));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", itemId));
                 return 0;
             }
 
@@ -278,12 +263,12 @@ public class ReskillableCommands {
             if (success) {
                 final String finalItemId = itemId;
                 source.sendSuccess(
-                        () -> Component.literal("§a✓ Item successfully removed from " + type.filename + ": §f" + finalItemId),
+                        () -> Component.translatable("rpg_tweaks.reskillable.success.removed", type.filename, finalItemId),
                         true
                 );
                 return 1;
             } else {
-                source.sendFailure(Component.literal("§cThe item does not exist in " + type.filename + " or there was an error when deleting it."));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.remove_failed", type.filename));
                 return 0;
             }
 
@@ -291,7 +276,7 @@ public class ReskillableCommands {
             source.sendFailure((Component) e.getRawMessage());
             return 0;
         } catch (Exception e) {
-            source.sendFailure(Component.literal("§cError: " + e.getMessage()));
+            source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.generic", e.getMessage()));
             return 0;
         }
     }
@@ -301,37 +286,28 @@ public class ReskillableCommands {
 
         try {
             if (!ReskillableConfigManager.isReskillableInstalled()) {
-                source.sendFailure(Component.literal("§cError: Reskillable Reimagined is not installed."));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed_short"));
                 return 0;
             }
 
             String itemId = getItemId(context, hasItemArg);
 
             if (!ReskillableConfigManager.isValidItemId(itemId)) {
-                source.sendFailure(Component.literal("§cInvalid item format: " + itemId));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", itemId));
                 return 0;
             }
 
             List<String> requirements = ReskillableConfigManager.getItemSkillLock(type, itemId);
 
             if (requirements == null || requirements.isEmpty()) {
-                source.sendFailure(Component.literal("§eThe item §f" + itemId + "§e has no requirements configured in " + type.filename));
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.info.no_requirements", itemId, type.filename));
                 return 0;
             }
 
             final String finalItemId = itemId;
-            source.sendSuccess(
-                    () -> Component.literal("§b=== Information of " + type.filename + " ==="),
-                    false
-            );
-            source.sendSuccess(
-                    () -> Component.literal("§7Item: §f" + finalItemId),
-                    false
-            );
-            source.sendSuccess(
-                    () -> Component.literal("§7Requirements: §f" + String.join(", ", requirements)),
-                    false
-            );
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.info.header", type.filename), false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", finalItemId), false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements", String.join(", ", requirements)), false);
 
             return 1;
 
@@ -339,7 +315,7 @@ public class ReskillableCommands {
             source.sendFailure((Component) e.getRawMessage());
             return 0;
         } catch (Exception e) {
-            source.sendFailure(Component.literal("§cError: " + e.getMessage()));
+            source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.generic", e.getMessage()));
             return 0;
         }
     }

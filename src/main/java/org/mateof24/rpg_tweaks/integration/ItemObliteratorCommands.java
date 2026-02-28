@@ -56,8 +56,7 @@ public class ItemObliteratorCommands {
         CommandSourceStack source = context.getSource();
 
         if (!ItemObliteratorConfigManager.isItemObliteratorInstalled()) {
-            source.sendFailure(Component.literal(
-                    "§cError: Item Obliterator it is not installed or its configuration file could not be found."));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.not_installed"));
             return 0;
         }
 
@@ -70,15 +69,12 @@ public class ItemObliteratorCommands {
         }
 
         if (!ItemObliteratorConfigManager.isValidItemId(itemId)) {
-            source.sendFailure(Component.literal(
-                    "§cInvalid item format: §f" + itemId +
-                            "\n§eCorrect format: §fmodid:item_name §e(Example: minecraft:diamond_sword)"));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.error.invalid_format", itemId));
             return 0;
         }
 
         if (ItemObliteratorConfigManager.isBlacklisted(itemId)) {
-            source.sendFailure(Component.literal(
-                    "§eThe item §f" + itemId + "§e it's already on Item Obliterator's blacklist."));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.error.already_blacklisted", itemId));
             return 0;
         }
 
@@ -86,16 +82,11 @@ public class ItemObliteratorCommands {
 
         if (success) {
             final String finalId = itemId;
-            source.sendSuccess(
-                    () -> Component.literal("§a✓ Item added to Item Obliterator blacklist:"),
-                    true);
-            source.sendSuccess(
-                    () -> Component.literal("§7Item: §f" + finalId),
-                    false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.success.banned"), true);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.success.item", finalId), false);
             return 1;
         } else {
-            source.sendFailure(Component.literal(
-                    "§cThe item could not be added. Please check the logs for more details."));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.error.ban_failed"));
             return 0;
         }
     }
@@ -104,8 +95,7 @@ public class ItemObliteratorCommands {
         CommandSourceStack source = context.getSource();
 
         if (!ItemObliteratorConfigManager.isItemObliteratorInstalled()) {
-            source.sendFailure(Component.literal(
-                    "§cError: Item Obliterator is not installed or its configuration file could not be found."));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.not_installed"));
             return 0;
         }
 
@@ -118,8 +108,7 @@ public class ItemObliteratorCommands {
         }
 
         if (!ItemObliteratorConfigManager.isValidItemId(itemId)) {
-            source.sendFailure(Component.literal(
-                    "§cInvalid item format: §f" + itemId));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.error.invalid_format_short", itemId));
             return 0;
         }
 
@@ -127,16 +116,11 @@ public class ItemObliteratorCommands {
 
         if (success) {
             final String finalId = itemId;
-            source.sendSuccess(
-                    () -> Component.literal("§a✓ Item removed from Item Obliterator blacklist:"),
-                    true);
-            source.sendSuccess(
-                    () -> Component.literal("§7Item: §f" + finalId),
-                    false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.success.unbanned"), true);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.success.item", finalId), false);
             return 1;
         } else {
-            source.sendFailure(Component.literal(
-                    "§eThe item §f" + itemId + "§e it's not on the blacklist or there was an error removing it."));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.error.not_blacklisted", itemId));
             return 0;
         }
     }
@@ -145,26 +129,22 @@ public class ItemObliteratorCommands {
         CommandSourceStack source = context.getSource();
 
         if (!ItemObliteratorConfigManager.isItemObliteratorInstalled()) {
-            source.sendFailure(Component.literal(
-                    "§cError: Item Obliterator is not installed."));
+            source.sendFailure(Component.translatable("rpg_tweaks.obliterator.not_installed_short"));
             return 0;
         }
 
         List<String> blacklist = ItemObliteratorConfigManager.getBlacklist();
 
         if (blacklist.isEmpty()) {
-            source.sendSuccess(
-                    () -> Component.literal("§eThe Item Obliterator blacklist is empty."),
-                    false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.list.empty"), false);
             return 1;
         }
 
-        source.sendSuccess(
-                () -> Component.literal("§b=== Item Obliterator Blacklist (" + blacklist.size() + " items) ==="),
-                false);
+        source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.list.header", blacklist.size()), false);
 
         for (String item : blacklist) {
-            source.sendSuccess(() -> Component.literal("§7- §f" + item), false);
+            final String finalItem = item;
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.obliterator.list.entry", finalItem), false);
         }
 
         return 1;
@@ -179,13 +159,13 @@ public class ItemObliteratorCommands {
 
         if (!(source.getEntity() instanceof ServerPlayer player)) {
             throw new CommandSyntaxException(null,
-                    Component.literal("Only players can use this command without specifying an item."));
+                    Component.translatable("rpg_tweaks.obliterator.error.players_only"));
         }
 
         ItemStack held = player.getMainHandItem();
         if (held.isEmpty()) {
             throw new CommandSyntaxException(null,
-                    Component.literal("You must hold an item in your main hand or specify an ID in the command."));
+                    Component.translatable("rpg_tweaks.obliterator.error.hand_empty"));
         }
 
         ResourceLocation key = BuiltInRegistries.ITEM.getKey(held.getItem());

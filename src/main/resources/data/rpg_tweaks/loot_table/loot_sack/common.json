@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:gift",
+  "pools": [
+    {
+      "rolls": 3,
+      "entries": [
+        { "type": "minecraft:item", "name": "minecraft:bread", "weight": 8 },
+        { "type": "minecraft:item", "name": "minecraft:wheat", "weight": 12 },
+        { "type": "minecraft:item", "name": "minecraft:stick", "weight": 4 },
+        { "type": "minecraft:item", "name": "minecraft:bone", "weight": 3 },
+        { "type": "minecraft:item", "name": "minecraft:string", "weight": 2 },
+        { "type": "minecraft:item", "name": "minecraft:leather", "weight": 2 },
+        { "type": "minecraft:item", "name": "minecraft:feather", "weight": 4 },
+        { "type": "minecraft:item", "name": "minecraft:flint", "weight": 2 },
+        { "type": "minecraft:item", "name": "minecraft:coal", "weight": 8 }
+      ]
+    }
+  ]
+}

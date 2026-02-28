@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:gift",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        { "type": "minecraft:item", "name": "minecraft:diamond", "weight": 8 },
+        { "type": "minecraft:item", "name": "minecraft:emerald", "weight": 6 },
+        { "type": "minecraft:item", "name": "minecraft:enchanted_golden_apple", "weight": 2 },
+        { "type": "minecraft:item", "name": "minecraft:nether_star", "weight": 1 },
+        { "type": "minecraft:item", "name": "minecraft:end_crystal", "weight": 2 },
+        { "type": "minecraft:item", "name": "minecraft:totem_of_undying", "weight": 2 }
+      ]
+    }
+  ]
+}

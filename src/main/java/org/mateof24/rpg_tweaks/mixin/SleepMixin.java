@@ -32,7 +32,7 @@ public class SleepMixin {
             cir.setReturnValue(Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_HERE));
             if (player instanceof ServerPlayer serverPlayer) {
                 serverPlayer.displayClientMessage(
-                        Component.literal("§cYou can't sleep until night " + requiredNight + "."),
+                        Component.translatable("rpg_tweaks.sleep.blocked", requiredNight),
                         true
                 );
             }

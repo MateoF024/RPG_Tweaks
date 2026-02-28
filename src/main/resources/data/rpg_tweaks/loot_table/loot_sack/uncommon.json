@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:gift",
+  "pools": [
+    {
+      "rolls": 2,
+      "entries": [
+        { "type": "minecraft:item", "name": "minecraft:iron_ingot", "weight": 4 },
+        { "type": "minecraft:item", "name": "minecraft:coal", "weight": 12 },
+        { "type": "minecraft:item", "name": "minecraft:copper_ingot", "weight": 8 },
+        { "type": "minecraft:item", "name": "minecraft:arrow", "weight": 6 },
+        { "type": "minecraft:item", "name": "minecraft:cooked_beef", "weight": 4 },
+        { "type": "minecraft:item", "name": "minecraft:lapis_lazuli", "weight": 3 },
+        { "type": "minecraft:item", "name": "minecraft:gunpowder", "weight": 4 }
+      ]
+    }
+  ]
+}

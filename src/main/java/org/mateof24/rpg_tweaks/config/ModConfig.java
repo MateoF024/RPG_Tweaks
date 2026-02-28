@@ -4,11 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.FMLPaths;
+import org.mateof24.rpg_tweaks.config.MobLootConfig;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ModConfig {
@@ -37,6 +40,9 @@ public class ModConfig {
     public float sleepHungerChance = 0f;
 
     public boolean pvpEnabled = true;
+    public List<String> blockedDimensions = new ArrayList<>();
+
+    public MobLootConfig mobLootConfig = new MobLootConfig();
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -93,10 +99,12 @@ public class ModConfig {
                 INSTANCE.validate();
 
                 INSTANCE.initializeDefaultOreXP();
+                INSTANCE.mobLootConfig.initDefaults();
             } catch (Exception e) {
                 LOGGER.error("Error loading configuration, using default values.", e);
                 INSTANCE = new ModConfig();
                 INSTANCE.initializeDefaultOreXP();
+                INSTANCE.mobLootConfig.initDefaults();
                 save();
             }
         } else {

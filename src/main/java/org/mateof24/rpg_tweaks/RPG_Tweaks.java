@@ -15,10 +15,12 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import org.mateof24.rpg_tweaks.command.RPGCommands;
 import org.mateof24.rpg_tweaks.config.ModConfig;
 import org.mateof24.rpg_tweaks.config.ModConfigScreen;
+import org.mateof24.rpg_tweaks.data.PlayerDimensionData;
 import org.mateof24.rpg_tweaks.integration.ReskillableCommands;
 import org.mateof24.rpg_tweaks.integration.ReskillableConfigManager;
 import org.mateof24.rpg_tweaks.integration.ItemObliteratorCommands;
 import org.mateof24.rpg_tweaks.integration.ItemObliteratorConfigManager;
+import org.mateof24.rpg_tweaks.item.ModItems;
 import org.slf4j.Logger;
 
 @Mod(org.mateof24.rpg_tweaks.RPG_Tweaks.MODID)
@@ -30,6 +32,8 @@ public class RPG_Tweaks {
         // Cargar configuración
         LOGGER.info("Initializing RPG-Tweaks...");
         ModConfig.load();
+        PlayerDimensionData.load();
+        ModItems.ITEMS.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
         modContainer.registerExtensionPoint(IConfigScreenFactory.class,
                 (container, parent) -> ModConfigScreen.createConfigScreen(parent));
