@@ -5,8 +5,7 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 ## 🚀 Features
 
 #### **Advancement XP Blocking**
-- Prevents players from gaining experience when completing achievements (advancements)
-- Configurable custom XP reward per advancement (0 = no XP, as before)
+- Configurable custom XP reward per advancement
 - Optional debug logs
 
 #### **Award Custom XP When Mining Mineral Blocks**
@@ -26,6 +25,21 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 - **Sleep From Night:** Minimum in-game night before players are allowed to sleep (0 = always).
 - **Sleep Heal:** Restore a configurable percentage of max HP after sleeping (0 = disabled).
 - **Sleep Hunger Loss:** Reduce food level after sleeping by a set number of points, with a configurable probability (0 = disabled).
+
+#### **Dimension Blocking**
+- Block player access to specific dimensions globally via config or command.
+- Per-player exceptions: individually allow or block dimensions for specific players, overriding global rules.
+- Pending exceptions: configure an exception for an offline player — it will be applied the next time they connect.
+- Commands: `/rpg_tweaks dimension block/allow <dimension> <player>`
+- Full GUI support in the config screen (add/remove global blocked dimensions and per-player exceptions).
+
+#### **Custom Mob Loot (Loot Sacks)**
+- Five tiers of loot sacks that drop from mobs: **Common**, **Uncommon**, **Rare**, **Epic**, and **Legendary**.
+- Drop chances for each tier are fully configurable per mob via the config screen or JSON.
+- Loot sacks can be opened by right-clicking to receive randomized loot from their respective loot table.
+- Loot table contents are fully customizable via the data files included in the mod.
+- Per-mob configuration also supports **removing specific vanilla drops** from a mob's loot table.
+- Default configuration includes a zombie example with pre-configured drop chances and removed vanilla drops.
 
 ## 🔌 Integrations and Compatibility with other mods (ONLY 1.21.1)
 
@@ -47,6 +61,8 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 |---|---|---|
 | `/rpg_tweaks reload` | OP 2 | Reloads the mod configuration |
 | `/rpg_tweaks pvp on\|off` | OP 2 | Enables or disables PvP |
+| `/rpg_tweaks dimension block <dimension> <players>` | OP 2 | Block one or more players from entering a dimension |
+| `/rpg_tweaks dimension allow <dimension> <players>` | OP 2 | Allow one or more players to enter a dimension (overrides global block) |
 | `/rpg_tweaks skills add/remove/info` | OP 2 | Manage Reskillable skill locks |
 | `/rpg_tweaks craftskills add/remove/info` | OP 2 | Manage Reskillable craft locks |
 | `/rpg_tweaks banitem/unbanitem` | OP 2 | Manage Item Obliterator blacklist |
@@ -62,6 +78,12 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 ### Optional (for integrations)(ONLY 1.21.1)
 - **Reskillable Reimagined** (only required to use the Reskillable-related commands/integration)
 - **Item Obliterator** (only required to use the banitem/unbanitem commands/integration)
+
+## 🌍 Localization
+
+RPG-Tweaks includes translations for:
+- **English** (`en_us`)
+- **Spanish** (`es_es`)
 
 ## ⚖️ Disclaimer / Not Affiliated
 

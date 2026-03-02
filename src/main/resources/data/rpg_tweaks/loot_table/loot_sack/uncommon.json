@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:gift",
+  "type": "minecraft:generic",
   "pools": [
     {
       "rolls": 2,
