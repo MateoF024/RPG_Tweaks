@@ -12,6 +12,7 @@ import org.mateof24.rpg_tweaks.data.PlayerDimensionData;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.resources.ResourceLocation;
+import com.mojang.brigadier.arguments.StringArgumentType;
 
 import java.util.Collection;
 
@@ -32,12 +33,15 @@ public class RPGCommands {
                                 .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .suggests((ctx, builder) -> suggestDimensions(ctx, builder))
                                         .then(Commands.argument("targets", EntityArgument.players())
-                                                .executes(ctx -> setPlayerDimension(ctx, false)))))
+                                                .executes(ctx -> setPlayerDimension(ctx, false, ""))
+                                                .then(Commands.argument("message", StringArgumentType.greedyString())
+                                                        .executes(ctx -> setPlayerDimension(ctx, false,
+                                                                StringArgumentType.getString(ctx, "message")))))))
                         .then(Commands.literal("allow")
                                 .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .suggests((ctx, builder) -> suggestDimensions(ctx, builder))
                                         .then(Commands.argument("targets", EntityArgument.players())
-                                                .executes(ctx -> setPlayerDimension(ctx, true))))))
+                                                .executes(ctx -> setPlayerDimension(ctx, true, ""))))))
         );
     }
 
@@ -71,7 +75,7 @@ public class RPGCommands {
         }
     }
 
-    private static int setPlayerDimension(CommandContext<CommandSourceStack> context, boolean isAllow) {
+    private static int setPlayerDimension(CommandContext<CommandSourceStack> context, boolean isAllow, String customMessage) {
         CommandSourceStack source = context.getSource();
         ResourceLocation dimension = ResourceLocationArgument.getId(context, "dimension");
         String dimStr = dimension.toString();
@@ -85,7 +89,7 @@ public class RPGCommands {
         }
 
         for (ServerPlayer player : targets) {
-            PlayerDimensionData.setDimension(player.getUUID(), player.getName().getString(), dimStr, isAllow);
+            PlayerDimensionData.setDimension(player.getUUID(), player.getName().getString(), dimStr, isAllow, customMessage);
             final net.minecraft.network.chat.MutableComponent playerName = player.getName().copy();
             if (isAllow) {
                 source.sendSuccess(() -> Component.translatable("rpg_tweaks.dimension.player_allowed", dimStr, playerName), true);

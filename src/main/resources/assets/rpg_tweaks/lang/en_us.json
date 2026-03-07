@@ -66,10 +66,10 @@
 
   "config.rpg_tweaks.category.advancements": "⭐ Advancements",
   "config.rpg_tweaks.category.advancements.tooltip": "Control experience from advancements",
-  "config.rpg_tweaks.option.block_advancement_xp": "Block Advancement XP",
-  "config.rpg_tweaks.option.block_advancement_xp.desc": "When enabled, players will not receive experience from completing advancements.",
-  "config.rpg_tweaks.option.advancement_xp_reward": "Advancement XP Reward",
-  "config.rpg_tweaks.option.advancement_xp_reward.desc": "XP granted when completing an advancement (0 = none).",
+  "config.rpg_tweaks.option.block_advancement_xp": "Override Advancement XP",
+  "config.rpg_tweaks.option.block_advancement_xp.desc": "Replaces vanilla XP rewards from advancements with custom values. Disable to use vanilla behavior.",
+  "config.rpg_tweaks.option.advancement_xp_reward": "Task XP Reward",
+  "config.rpg_tweaks.option.advancement_xp_reward.desc": "XP granted when completing a Task advancement (0 = none).",
   "config.rpg_tweaks.option.log_xp_blocking": "Log XP Blocking (Debug)",
   "config.rpg_tweaks.option.log_xp_blocking.desc": "Debug: Logs detailed information to console",
 
@@ -197,5 +197,20 @@
   "config.rpg_tweaks.value.xp": "%s XP",
   "config.rpg_tweaks.value.multiplier": "%sx",
   "config.rpg_tweaks.value.percent": "%s%%",
-  "config.rpg_tweaks.value.points": "%s points"
+  "config.rpg_tweaks.value.points": "%s points",
+
+  "config.rpg_tweaks.option.goal_xp_reward": "Goal XP Reward",
+  "config.rpg_tweaks.option.goal_xp_reward.desc": "XP granted when completing a Goal advancement (0 = none).",
+  "config.rpg_tweaks.option.challenge_xp_reward": "Challenge XP Reward",
+  "config.rpg_tweaks.option.challenge_xp_reward.desc": "XP granted when completing a Challenge advancement (0 = none).",
+
+  "config.rpg_tweaks.option.dimension_custom_msg": "Custom Block Message",
+  "config.rpg_tweaks.option.dimension_custom_msg.desc": "Message shown when access is blocked. Leave empty to use the default message.",
+
+  "config.rpg_tweaks.option.ore_xp_fortune_bonus": "Fortune XP Bonus (per level)",
+  "config.rpg_tweaks.option.ore_xp_fortune_bonus.desc": "XP multiplier bonus added per Fortune level. 0 = disabled. Example: 0.5 → Fortune III = 2.5x XP.",
+  "config.rpg_tweaks.option.ore_xp_fortune_bonus.value": "+%sx per Fortune level",
+
+  "config.rpg_tweaks.option.looting_bonus": "Looting Tier Bonus (per level)",
+  "config.rpg_tweaks.option.looting_bonus.desc": "Adds this % to each tier's drop chance per Looting level. Higher tiers are evaluated first so Looting shifts drops toward better tiers. Always one sack."
 }

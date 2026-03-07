@@ -66,10 +66,10 @@
 
   "config.rpg_tweaks.category.advancements": "⭐ Logros",
   "config.rpg_tweaks.category.advancements.tooltip": "Controla la experiencia de los logros",
-  "config.rpg_tweaks.option.block_advancement_xp": "Bloquear XP de Logros",
-  "config.rpg_tweaks.option.block_advancement_xp.desc": "Cuando está activado, los jugadores no recibirán experiencia al completar logros.",
-  "config.rpg_tweaks.option.advancement_xp_reward": "Recompensa de XP por Logro",
-  "config.rpg_tweaks.option.advancement_xp_reward.desc": "XP otorgada al completar un logro (0 = ninguna).",
+  "config.rpg_tweaks.option.block_advancement_xp": "Sobrescribir XP de Logros",
+  "config.rpg_tweaks.option.block_advancement_xp.desc": "Reemplaza las recompensas de XP vanilla de los logros con valores personalizados. Desactiva para usar el comportamiento vanilla.",
+  "config.rpg_tweaks.option.advancement_xp_reward": "Recompensa XP por Tarea",
+  "config.rpg_tweaks.option.advancement_xp_reward.desc": "XP otorgada al completar un logro de tipo Tarea (0 = ninguna).",
   "config.rpg_tweaks.option.log_xp_blocking": "Registrar Bloqueo de XP (Debug)",
   "config.rpg_tweaks.option.log_xp_blocking.desc": "Debug: Registra información detallada en la consola",
 
@@ -197,5 +197,20 @@
   "config.rpg_tweaks.value.xp": "%s XP",
   "config.rpg_tweaks.value.multiplier": "%sx",
   "config.rpg_tweaks.value.percent": "%s%%",
-  "config.rpg_tweaks.value.points": "%s puntos"
+  "config.rpg_tweaks.value.points": "%s puntos",
+
+  "config.rpg_tweaks.option.goal_xp_reward": "Recompensa XP por Meta",
+  "config.rpg_tweaks.option.goal_xp_reward.desc": "XP otorgada al completar un logro de tipo Meta (0 = ninguna).",
+  "config.rpg_tweaks.option.challenge_xp_reward": "Recompensa XP por Desafío",
+  "config.rpg_tweaks.option.challenge_xp_reward.desc": "XP otorgada al completar un logro de tipo Desafío (0 = ninguna).",
+
+  "config.rpg_tweaks.option.dimension_custom_msg": "Mensaje de Bloqueo Personalizado",
+  "config.rpg_tweaks.option.dimension_custom_msg.desc": "Mensaje mostrado al bloquear el acceso. Dejar vacío para usar el mensaje por defecto.",
+
+  "config.rpg_tweaks.option.ore_xp_fortune_bonus": "Bonus XP por Fortuna (por nivel)",
+  "config.rpg_tweaks.option.ore_xp_fortune_bonus.desc": "Multiplicador de XP adicional por cada nivel de Fortuna. 0 = desactivado. Ejemplo: 0.5 → Fortuna III = 2.5x XP.",
+  "config.rpg_tweaks.option.ore_xp_fortune_bonus.value": "+%sx por nivel de Fortuna",
+
+  "config.rpg_tweaks.option.looting_bonus": "Bonus de Tier por Saqueo (por nivel)",
+  "config.rpg_tweaks.option.looting_bonus.desc": "Añade este % a la probabilidad de cada tier por nivel de Saqueo. Los tiers superiores se evalúan primero, por lo que Saqueo favorece mejores sacos. Siempre un solo saco."
 }

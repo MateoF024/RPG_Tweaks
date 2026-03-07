@@ -25,13 +25,10 @@ public class DimensionBlockHandler {
     @SubscribeEvent
     public static void onEntityTravel(EntityTravelToDimensionEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-
         String dest = event.getDimension().location().toString();
-
         if (isBlocked(player, dest)) {
             event.setCanceled(true);
-            player.displayClientMessage(
-                    Component.translatable("rpg_tweaks.dimension.blocked", dest), true);
+            sendBlockedMessage(player, dest);
         } else {
             lastSafePosition.put(player.getUUID(), new double[]{
                     player.getX(), player.getY(), player.getZ()
@@ -42,13 +39,10 @@ public class DimensionBlockHandler {
     @SubscribeEvent
     public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-
         String dest = event.getTo().location().toString();
         if (!isBlocked(player, dest)) return;
-
         ResourceKey<Level> fromKey = event.getFrom();
         ServerLevel fromLevel = player.getServer().getLevel(fromKey);
-
         if (fromLevel != null) {
             double[] pos = lastSafePosition.getOrDefault(player.getUUID(), new double[]{
                     fromLevel.getSharedSpawnPos().getX(),
@@ -57,15 +51,31 @@ public class DimensionBlockHandler {
             });
             player.teleportTo(fromLevel, pos[0], pos[1], pos[2], player.getYRot(), player.getXRot());
         }
-
-        player.displayClientMessage(
-                Component.translatable("rpg_tweaks.dimension.blocked", dest), true);
+        sendBlockedMessage(player, dest);
     }
 
     public static boolean isBlocked(ServerPlayer player, String dimension) {
         if (PlayerDimensionData.isAllowed(player.getUUID(), dimension)) return false;
         if (PlayerDimensionData.isBlocked(player.getUUID(), dimension)) return true;
-        return ModConfig.getInstance().blockedDimensions.contains(dimension);
+        return ModConfig.getInstance().blockedDimensions.containsKey(dimension);
+    }
+
+    private static void sendBlockedMessage(ServerPlayer player, String dimension) {
+        String perPlayerMsg = PlayerDimensionData.getBlockedMessage(player.getUUID(), dimension);
+        if (perPlayerMsg != null && !perPlayerMsg.isBlank()) {
+            player.displayClientMessage(Component.literal(parseColors(perPlayerMsg)), true);
+            return;
+        }
+        String global = ModConfig.getInstance().blockedDimensions.get(dimension);
+        if (global != null && !global.isBlank()) {
+            player.displayClientMessage(Component.literal(parseColors(global)), true);
+        } else {
+            player.displayClientMessage(Component.translatable("rpg_tweaks.dimension.blocked", dimension), true);
+        }
+    }
+
+    private static String parseColors(String text) {
+        return text.replace("&", "§");
     }
 
     public static void clearPlayer(ServerPlayer player) {

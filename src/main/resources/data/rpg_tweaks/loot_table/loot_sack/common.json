@@ -2,17 +2,28 @@
   "type": "minecraft:generic",
   "pools": [
     {
-      "rolls": 3,
+      "rolls": { "min": 2, "max": 4 },
       "entries": [
-        { "type": "minecraft:item", "name": "minecraft:bread", "weight": 8 },
-        { "type": "minecraft:item", "name": "minecraft:wheat", "weight": 12 },
-        { "type": "minecraft:item", "name": "minecraft:stick", "weight": 4 },
-        { "type": "minecraft:item", "name": "minecraft:bone", "weight": 3 },
-        { "type": "minecraft:item", "name": "minecraft:string", "weight": 2 },
-        { "type": "minecraft:item", "name": "minecraft:leather", "weight": 2 },
-        { "type": "minecraft:item", "name": "minecraft:feather", "weight": 4 },
-        { "type": "minecraft:item", "name": "minecraft:flint", "weight": 2 },
-        { "type": "minecraft:item", "name": "minecraft:coal", "weight": 8 }
+        { "type": "minecraft:item", "name": "minecraft:wheat_seeds",    "weight": 12, "count": { "min": 2, "max": 8 } },
+        { "type": "minecraft:item", "name": "minecraft:pumpkin_seeds",  "weight": 8,  "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:melon_seeds",    "weight": 8,  "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:beetroot_seeds", "weight": 8,  "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:apple",          "weight": 10, "count": { "min": 1, "max": 4 } },
+        { "type": "minecraft:item", "name": "minecraft:carrot",         "weight": 10, "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:potato",         "weight": 10, "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:beetroot",       "weight": 8,  "count": { "min": 2, "max": 5 } },
+        { "type": "minecraft:item", "name": "minecraft:leather",        "weight": 8,  "count": { "min": 1, "max": 3 } },
+        { "type": "minecraft:item", "name": "minecraft:feather",        "weight": 10, "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:string",         "weight": 10, "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:bone",           "weight": 8,  "count": { "min": 1, "max": 4 } },
+        { "type": "minecraft:item", "name": "minecraft:rotten_flesh",   "weight": 6,  "count": { "min": 1, "max": 3 } },
+        { "type": "minecraft:item", "name": "minecraft:arrow",          "weight": 8,  "count": { "min": 2, "max": 8 } },
+        { "type": "minecraft:item", "name": "minecraft:gunpowder",      "weight": 6,  "count": { "min": 1, "max": 4 } },
+        { "type": "minecraft:item", "name": "minecraft:spider_eye",     "weight": 5,  "count": { "min": 1, "max": 3 } },
+        { "type": "minecraft:item", "name": "minecraft:flint",          "weight": 8,  "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:stick",          "weight": 6,  "count": { "min": 4, "max": 12 } },
+        { "type": "minecraft:item", "name": "minecraft:white_wool",     "weight": 6,  "count": { "min": 1, "max": 4 } },
+        { "type": "minecraft:item", "name": "minecraft:sugar_cane",     "weight": 8,  "count": { "min": 2, "max": 6 } }
       ]
     }
   ]

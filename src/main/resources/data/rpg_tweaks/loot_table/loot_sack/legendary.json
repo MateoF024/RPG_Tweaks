@@ -2,12 +2,25 @@
   "type": "minecraft:generic",
   "pools": [
     {
-      "rolls": 1,
+      "rolls": { "min": 2, "max": 3 },
       "entries": [
-        { "type": "minecraft:item", "name": "minecraft:netherite_ingot", "weight": 2 },
-        { "type": "minecraft:item", "name": "minecraft:netherite_scrap", "weight": 8 },
-        { "type": "minecraft:item", "name": "minecraft:enchanted_golden_apple", "weight": 1 },
-        { "type": "minecraft:item", "name": "minecraft:totem_of_undying", "weight": 1 }
+        { "type": "minecraft:item", "name": "minecraft:netherite_ingot",       "weight": 5,  "count": { "min": 1, "max": 2 } },
+        { "type": "minecraft:item", "name": "minecraft:netherite_scrap",       "weight": 8,  "count": { "min": 1, "max": 4 } },
+        { "type": "minecraft:item", "name": "minecraft:ancient_debris",        "weight": 5,  "count": { "min": 1, "max": 2 } },
+        { "type": "minecraft:item", "name": "minecraft:nether_star",           "weight": 3,  "count": { "min": 1, "max": 1 } },
+        { "type": "minecraft:item", "name": "minecraft:shulker_shell",         "weight": 6,  "count": { "min": 1, "max": 3 } },
+        { "type": "minecraft:item", "name": "minecraft:dragon_breath",         "weight": 6,  "count": { "min": 1, "max": 4 } },
+        { "type": "minecraft:item", "name": "minecraft:echo_shard",            "weight": 5,  "count": { "min": 1, "max": 3 } },
+        { "type": "minecraft:item", "name": "minecraft:chorus_fruit",          "weight": 7,  "count": { "min": 2, "max": 6 } },
+        { "type": "minecraft:item", "name": "minecraft:popped_chorus_fruit",   "weight": 6,  "count": { "min": 2, "max": 5 } },
+        { "type": "minecraft:item", "name": "minecraft:heart_of_the_sea",      "weight": 3,  "count": { "min": 1, "max": 1 } },
+        { "type": "minecraft:item", "name": "minecraft:enchanted_golden_apple","weight": 4,  "count": { "min": 1, "max": 1 } },
+        { "type": "minecraft:item", "name": "minecraft:experience_bottle",     "weight": 7,  "count": { "min": 8, "max": 16 } },
+        { "type": "minecraft:item", "name": "minecraft:diamond",               "weight": 6,  "count": { "min": 2, "max": 5 } },
+        { "type": "minecraft:item", "name": "minecraft:blaze_rod",             "weight": 5,  "count": { "min": 2, "max": 5 } },
+        { "type": "minecraft:item", "name": "minecraft:ghast_tear",            "weight": 4,  "count": { "min": 1, "max": 3 } },
+        { "type": "minecraft:item", "name": "minecraft:crying_obsidian",       "weight": 4,  "count": { "min": 2, "max": 5 } },
+        { "type": "minecraft:item", "name": "minecraft:totem_of_undying",      "weight": 1,  "count": { "min": 1, "max": 1 } }
       ]
     }
   ]

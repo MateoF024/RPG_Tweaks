@@ -29,6 +29,7 @@ public class LootSackItem extends Item {
 
     private static final Logger LOGGER = LogUtils.getLogger();
     private final ResourceKey<LootTable> lootTableKey;
+    private final boolean foil;
     private final ChatFormatting nameColor;
 
     public static Item.Properties createProperties(int stackSize, String namespace, String path) {
@@ -44,10 +45,21 @@ public class LootSackItem extends Item {
         return props;
     }
 
-    public LootSackItem(Properties properties, ResourceKey<LootTable> lootTableKey, ChatFormatting nameColor) {
+    public LootSackItem(Properties properties, ResourceKey<LootTable> lootTableKey, boolean foil, ChatFormatting nameColor) {
         super(properties);
         this.lootTableKey = lootTableKey;
+        this.foil = foil;
         this.nameColor = nameColor;
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return foil || super.isFoil(stack);
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        return super.getName(stack).copy().withStyle(nameColor);
     }
 
     public ResourceLocation getLootTableLocation() {

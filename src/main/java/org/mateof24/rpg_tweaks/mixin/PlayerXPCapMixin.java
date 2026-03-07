@@ -22,23 +22,18 @@ public class PlayerXPCapMixin {
         return Math.min(amount, cap - currentXP);
     }
 
+    private static final java.util.Map<Integer, Integer> XP_LEVEL_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+
     private static int calculateActualXP(int level, float progress) {
-        int totalAtLevel;
-        if (level <= 16) {
-            totalAtLevel = level * level + 6 * level;
-        } else if (level <= 31) {
-            totalAtLevel = (int) (2.5 * level * level - 40.5 * level + 360);
-        } else {
-            totalAtLevel = (int) (4.5 * level * level - 162.5 * level + 2220);
-        }
+        int totalAtLevel = XP_LEVEL_CACHE.computeIfAbsent(level, l -> {
+            if (l <= 16) return l * l + 6 * l;
+            else if (l <= 31) return (int) (2.5 * l * l - 40.5 * l + 360);
+            else return (int) (4.5 * l * l - 162.5 * l + 2220);
+        });
         int xpForNext;
-        if (level <= 15) {
-            xpForNext = 2 * level + 7;
-        } else if (level <= 30) {
-            xpForNext = 5 * level - 38;
-        } else {
-            xpForNext = 9 * level - 158;
-        }
+        if (level <= 15) xpForNext = 2 * level + 7;
+        else if (level <= 30) xpForNext = 5 * level - 38;
+        else xpForNext = 9 * level - 158;
         return totalAtLevel + Math.round(progress * xpForNext);
     }
 }

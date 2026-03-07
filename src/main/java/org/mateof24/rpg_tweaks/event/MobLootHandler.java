@@ -14,7 +14,7 @@ import org.mateof24.rpg_tweaks.config.ModConfig;
 import org.mateof24.rpg_tweaks.item.ModItems;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import org.mateof24.rpg_tweaks.item.ModItems;
+
 
 import java.util.Iterator;
 
@@ -34,34 +34,43 @@ public class MobLootHandler {
         while (iterator.hasNext()) {
             ItemEntity itemEntity = iterator.next();
             ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(itemEntity.getItem().getItem());
-            if (dropConfig.removedDrops.contains(itemId.toString())) {
-                iterator.remove();
-            }
+            if (dropConfig.removedDrops.contains(itemId.toString())) iterator.remove();
         }
 
-        double x = entity.getX();
-        double y = entity.getY();
-        double z = entity.getZ();
+        int lootingLevel = 0;
+        if (event.getSource().getEntity() instanceof LivingEntity killer) {
+            try {
+                lootingLevel = killer.getMainHandItem().getEnchantmentLevel(
+                        entity.level().holderLookup(net.minecraft.core.registries.Registries.ENCHANTMENT)
+                                .getOrThrow(net.minecraft.world.item.enchantment.Enchantments.LOOTING));
+            } catch (Exception ignored) {}
+        }
 
-        rollAndAdd(event, entity, dropConfig.commonChance,    new ItemStack(ModItems.LOOT_SACK_COMMON.get()),    x, y, z, false);
-        rollAndAdd(event, entity, dropConfig.uncommonChance,  new ItemStack(ModItems.LOOT_SACK_UNCOMMON.get()),  x, y, z, false);
-        rollAndAdd(event, entity, dropConfig.rareChance,      new ItemStack(ModItems.LOOT_SACK_RARE.get()),      x, y, z, false);
-        rollAndAdd(event, entity, dropConfig.epicChance,      new ItemStack(ModItems.LOOT_SACK_EPIC.get()),      x, y, z, true);
-        rollAndAdd(event, entity, dropConfig.legendaryChance, new ItemStack(ModItems.LOOT_SACK_LEGENDARY.get()), x, y, z, true);
+        float bonus = lootingLevel * ModConfig.getInstance().lootSackLootingBonus;
+
+        ItemStack winner = rollTier(entity, dropConfig.legendaryChance, bonus, ModItems.LOOT_SACK_LEGENDARY.get());
+        if (winner == null) winner = rollTier(entity, dropConfig.epicChance, bonus, ModItems.LOOT_SACK_EPIC.get());
+        if (winner == null) winner = rollTier(entity, dropConfig.rareChance, bonus, ModItems.LOOT_SACK_RARE.get());
+        if (winner == null) winner = rollTier(entity, dropConfig.uncommonChance, bonus, ModItems.LOOT_SACK_UNCOMMON.get());
+        if (winner == null) winner = rollTier(entity, dropConfig.commonChance, bonus, ModItems.LOOT_SACK_COMMON.get());
+        if (winner == null) return;
+
+        boolean isHighTier = winner.getItem() == ModItems.LOOT_SACK_EPIC.get()
+                || winner.getItem() == ModItems.LOOT_SACK_LEGENDARY.get();
+
+        ItemEntity drop = new ItemEntity(entity.level(), entity.getX(), entity.getY() + 0.5, entity.getZ(), winner);
+        drop.setPickUpDelay(10);
+        event.getDrops().add(drop);
+
+        if (isHighTier) {
+            entity.level().playSound(null, entity.blockPosition(),
+                    SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.5f, 1.0f);
+        }
     }
 
-    private static void rollAndAdd(LivingDropsEvent event, LivingEntity entity,
-                                   float chance, ItemStack stack, double x, double y, double z,
-                                   boolean challengeSound) {
-        if (chance <= 0f) return;
-        if (entity.level().random.nextFloat() * 100f < chance) {
-            ItemEntity itemEntity = new ItemEntity(entity.level(), x, y + 0.5, z, stack);
-            itemEntity.setPickUpDelay(10);
-            event.getDrops().add(itemEntity);
-            if (challengeSound) {
-                entity.level().playSound(null, entity.blockPosition(),
-                        SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.5f, 1.0f);
-            }
-        }
+    private static ItemStack rollTier(LivingEntity entity, float chance, float bonus, net.minecraft.world.item.Item item) {
+        if (chance <= 0f) return null;
+        float effective = Math.min(100f, chance + bonus);
+        return entity.level().random.nextFloat() * 100f < effective ? new ItemStack(item) : null;
     }
 }

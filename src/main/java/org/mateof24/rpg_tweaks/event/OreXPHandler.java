@@ -25,6 +25,12 @@ import java.util.*;
 public class OreXPHandler {
 
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final java.util.Map<Block, OreXPConfig.OreXPValues> BLOCK_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final OreXPConfig.OreXPValues NO_CONFIG = new OreXPConfig.OreXPValues();
+
+    public static void invalidateCache() {
+        BLOCK_CACHE.clear();
+    }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
@@ -53,13 +59,14 @@ public class OreXPHandler {
         BlockPos pos = event.getPos();
 
         String blockId = block.builtInRegistryHolder().key().location().toString();
-        List<String> blockTags = getBlockTags(block);
 
-        OreXPConfig.OreXPValues xpValues = config.oreXPConfig.getConfigForBlock(blockId, blockTags);
+        OreXPConfig.OreXPValues xpValues = BLOCK_CACHE.computeIfAbsent(block, b -> {
+            List<String> tags = getBlockTags(b);
+            OreXPConfig.OreXPValues v = config.oreXPConfig.getConfigForBlock(blockId, tags);
+            return v != null ? v : NO_CONFIG;
+        });
 
-        if (xpValues == null) {
-            return;
-        }
+        if (xpValues == NO_CONFIG) return;
 
         ItemStack tool = player.getMainHandItem();
 
@@ -84,7 +91,11 @@ public class OreXPHandler {
             return;
         }
 
-        int customXP = xpValues.getRandomXP();
+        int baseXP = xpValues.getRandomXP();
+        int fortuneLevel = getFortuneLevel(tool, level);
+        int customXP = (fortuneLevel > 0 && config.oreXPFortuneBonus > 0f)
+                ? Math.round(baseXP * (1f + fortuneLevel * config.oreXPFortuneBonus))
+                : baseXP;
 
         if (customXP > 0) {
             serverLevel.getServer().execute(() -> {
@@ -116,6 +127,15 @@ public class OreXPHandler {
         return tags;
     }
 
+    private static int getFortuneLevel(ItemStack tool, Level level) {
+        try {
+            return tool.getEnchantmentLevel(
+                    level.holderLookup(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE));
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
     private static boolean hasSilkTouch(ItemStack tool, Level level) {
         try {
             return tool.getEnchantmentLevel(
@@ -131,11 +151,13 @@ public class OreXPHandler {
         try {
             ModConfig config = ModConfig.getInstance();
             if (!config.enableCustomOreXP) return false;
-
-            String blockId = block.builtInRegistryHolder().key().location().toString();
-            List<String> blockTags = getBlockTags(block);
-
-            return config.oreXPConfig.getConfigForBlock(blockId, blockTags) != null;
+            OreXPConfig.OreXPValues cached = BLOCK_CACHE.computeIfAbsent(block, b -> {
+                String blockId = b.builtInRegistryHolder().key().location().toString();
+                List<String> tags = getBlockTags(b);
+                OreXPConfig.OreXPValues v = config.oreXPConfig.getConfigForBlock(blockId, tags);
+                return v != null ? v : NO_CONFIG;
+            });
+            return cached != NO_CONFIG;
         } catch (Exception e) {
             return false;
         }

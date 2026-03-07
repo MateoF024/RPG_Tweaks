@@ -24,22 +24,27 @@ public class LootSackResolver {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final Gson GSON = new Gson();
     private static final Random RANDOM = new Random();
+    private static final java.util.Map<ResourceLocation, JsonObject> TABLE_CACHE = new java.util.HashMap<>();
 
     public static List<ItemStack> resolve(ResourceLocation lootTableLocation) {
-        String resourcePath = "/data/" + lootTableLocation.getNamespace()
-                + "/loot_table/" + lootTableLocation.getPath() + ".json";
-
-        try (InputStream is = LootSackResolver.class.getResourceAsStream(resourcePath)) {
-            if (is == null) {
-                LOGGER.error("[LootSack] Resource not found: {}", resourcePath);
+        if (!TABLE_CACHE.containsKey(lootTableLocation)) {
+            String resourcePath = "/data/" + lootTableLocation.getNamespace()
+                    + "/loot_table/" + lootTableLocation.getPath() + ".json";
+            try (InputStream is = LootSackResolver.class.getResourceAsStream(resourcePath)) {
+                if (is != null) {
+                    TABLE_CACHE.put(lootTableLocation,
+                            GSON.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonObject.class));
+                } else {
+                    LOGGER.error("[LootSack] Resource not found: {}", resourcePath);
+                    return List.of();
+                }
+            } catch (Exception e) {
+                LOGGER.error("[LootSack] Error reading loot table {}: {}", resourcePath, e.getMessage());
                 return List.of();
             }
-            JsonObject root = GSON.fromJson(new InputStreamReader(is, StandardCharsets.UTF_8), JsonObject.class);
-            return parseAndRoll(root);
-        } catch (Exception e) {
-            LOGGER.error("[LootSack] Error reading loot table {}: {}", resourcePath, e.getMessage());
-            return List.of();
         }
+        JsonObject root = TABLE_CACHE.get(lootTableLocation);
+        return root != null ? parseAndRoll(root) : List.of();
     }
 
     private static List<ItemStack> parseAndRoll(JsonObject root) {
@@ -48,7 +53,17 @@ public class LootSackResolver {
 
         for (JsonElement poolEl : root.getAsJsonArray("pools")) {
             JsonObject pool = poolEl.getAsJsonObject();
-            int rolls = pool.has("rolls") ? pool.get("rolls").getAsInt() : 1;
+
+            int rolls;
+            if (pool.has("rolls") && pool.get("rolls").isJsonObject()) {
+                JsonObject rollObj = pool.getAsJsonObject("rolls");
+                int min = rollObj.has("min") ? rollObj.get("min").getAsInt() : 1;
+                int max = rollObj.has("max") ? rollObj.get("max").getAsInt() : 1;
+                rolls = min + (max > min ? RANDOM.nextInt(max - min + 1) : 0);
+            } else {
+                rolls = pool.has("rolls") ? pool.get("rolls").getAsInt() : 1;
+            }
+
             if (!pool.has("entries")) continue;
 
             List<WeightedItem> weighted = new ArrayList<>();
@@ -59,7 +74,21 @@ public class LootSackResolver {
                 if (!entry.has("name")) continue;
                 String itemId = entry.get("name").getAsString();
                 int weight = entry.has("weight") ? entry.get("weight").getAsInt() : 1;
-                weighted.add(new WeightedItem(itemId, weight));
+
+                int countMin = 1;
+                int countMax = 1;
+                if (entry.has("count")) {
+                    JsonElement countEl = entry.get("count");
+                    if (countEl.isJsonObject()) {
+                        JsonObject countObj = countEl.getAsJsonObject();
+                        countMin = countObj.has("min") ? countObj.get("min").getAsInt() : 1;
+                        countMax = countObj.has("max") ? countObj.get("max").getAsInt() : 1;
+                    } else {
+                        countMin = countMax = countEl.getAsInt();
+                    }
+                }
+
+                weighted.add(new WeightedItem(itemId, weight, countMin, countMax));
                 totalWeight += weight;
             }
 
@@ -71,7 +100,8 @@ public class LootSackResolver {
                 for (WeightedItem wi : weighted) {
                     cumulative += wi.weight;
                     if (roll < cumulative) {
-                        ItemStack stack = createStack(wi.itemId);
+                        int count = wi.countMin + (wi.countMax > wi.countMin ? RANDOM.nextInt(wi.countMax - wi.countMin + 1) : 0);
+                        ItemStack stack = createStack(wi.itemId, count);
                         if (!stack.isEmpty()) result.add(stack);
                         break;
                     }
@@ -81,7 +111,7 @@ public class LootSackResolver {
         return result;
     }
 
-    private static ItemStack createStack(String itemId) {
+    private static ItemStack createStack(String itemId, int count) {
         try {
             String[] parts = itemId.split(":", 2);
             if (parts.length != 2) return ItemStack.EMPTY;
@@ -109,12 +139,15 @@ public class LootSackResolver {
                 LOGGER.warn("[LootSack] Unknown item: {}", itemId);
                 return ItemStack.EMPTY;
             }
-            return new ItemStack(item);
+
+            ItemStack stack = new ItemStack(item);
+            stack.setCount(Math.min(count, item.getDefaultMaxStackSize()));
+            return stack;
         } catch (Exception e) {
             LOGGER.error("[LootSack] Error creating stack for {}: {}", itemId, e.getMessage());
             return ItemStack.EMPTY;
         }
     }
 
-    private record WeightedItem(String itemId, int weight) {}
+    private record WeightedItem(String itemId, int weight, int countMin, int countMax) {}
 }

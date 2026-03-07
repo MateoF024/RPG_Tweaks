@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 public class ModConfig {
@@ -24,8 +26,11 @@ public class ModConfig {
     public boolean blockAdvancementXP = true;
     public boolean logXPBlocking = false;
     public int advancementXPReward = 0;
+    public int goalXPReward = 0;
+    public int challengeXPReward = 0;
 
     public boolean enableCustomOreXP = true;
+    public float oreXPFortuneBonus = 0.0f;
     public boolean logOreXP = false;
     public OreXPConfig oreXPConfig = new OreXPConfig();
 
@@ -40,9 +45,10 @@ public class ModConfig {
     public float sleepHungerChance = 0f;
 
     public boolean pvpEnabled = true;
-    public List<String> blockedDimensions = new ArrayList<>();
+    public Map<String, String> blockedDimensions = new LinkedHashMap<>();
 
     public MobLootConfig mobLootConfig = new MobLootConfig();
+    public float lootSackLootingBonus = 5.0f;
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -137,5 +143,6 @@ public class ModConfig {
     public static void reload() {
         LOGGER.info("Reloading settings...");
         load();
+        org.mateof24.rpg_tweaks.event.OreXPHandler.invalidateCache();
     }
 }

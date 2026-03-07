@@ -33,6 +33,16 @@ public class ModConfigScreen {
                         .binding(false, () -> config.logOreXP, value -> config.logOreXP = value)
                         .controller(TickBoxControllerBuilder::create)
                         .build())
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.ore_xp_fortune_bonus"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.ore_xp_fortune_bonus.desc")))
+                        .binding(0.0f, () -> config.oreXPFortuneBonus, value -> config.oreXPFortuneBonus = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.0f, 2.0f).step(0.1f)
+                                .formatValue(v -> v == 0f
+                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                        : Component.translatable("config.rpg_tweaks.option.ore_xp_fortune_bonus.value",
+                                        String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
+                        .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.option.add_block_tag").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.add_block_tag.desc")))
@@ -67,6 +77,15 @@ public class ModConfigScreen {
         ConfigCategory.Builder mobLootCategoryBuilder = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.rpg_tweaks.category.mob_loot").withStyle(ChatFormatting.DARK_RED))
                 .tooltip(Component.translatable("config.rpg_tweaks.category.mob_loot.tooltip"))
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.looting_bonus"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.looting_bonus.desc")))
+                        .binding(5.0f, () -> config.lootSackLootingBonus, value -> config.lootSackLootingBonus = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.0f, 50.0f).step(0.5f)
+                                .formatValue(v -> v == 0f
+                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                        : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
+                        .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.option.add_mob").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.add_mob.desc")))
@@ -93,6 +112,22 @@ public class ModConfigScreen {
                                 .name(Component.translatable("config.rpg_tweaks.option.advancement_xp_reward"))
                                 .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.advancement_xp_reward.desc")))
                                 .binding(0, () -> config.advancementXPReward, value -> config.advancementXPReward = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 1000).step(1)
+                                        .formatValue(v -> Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
+                                .build())
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.option.goal_xp_reward"))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.goal_xp_reward.desc")))
+                                .binding(0, () -> config.goalXPReward, value -> config.goalXPReward = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt)
+                                        .range(0, 1000).step(1)
+                                        .formatValue(v -> Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
+                                .build())
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.option.challenge_xp_reward"))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.challenge_xp_reward.desc")))
+                                .binding(0, () -> config.challengeXPReward, value -> config.challengeXPReward = value)
                                 .controller(opt -> IntegerSliderControllerBuilder.create(opt)
                                         .range(0, 1000).step(1)
                                         .formatValue(v -> Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
@@ -200,15 +235,36 @@ public class ModConfigScreen {
                 .generateScreen(parent);
     }
 
-    private static void refreshScreen() {
+    private static void refreshScreen(int categoryIndex) {
         net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
         ModConfig.save();
-        mc.execute(() -> mc.setScreen(createConfigScreen(lastParent)));
+        Screen newScreen = createConfigScreen(lastParent);
+        mc.setScreen(newScreen);
+        selectCategory(newScreen, categoryIndex);
+    }
+
+    private static void selectCategory(Screen screen, int index) {
+        try {
+            Class<?> clazz = screen.getClass();
+            while (clazz != null && clazz != Screen.class) {
+                try {
+                    java.lang.reflect.Field f = clazz.getDeclaredField("tabNavigationBar");
+                    f.setAccessible(true);
+                    Object bar = f.get(screen);
+                    if (bar != null) {
+                        bar.getClass().getMethod("selectTab", int.class, boolean.class).invoke(bar, index, false);
+                        return;
+                    }
+                } catch (NoSuchFieldException ignored) {
+                    clazz = clazz.getSuperclass();
+                }
+            }
+        } catch (Exception ignored) {}
     }
 
     private static List<OptionGroup> createOreGroups(ModConfig config) {
         List<OptionGroup> groups = new ArrayList<>();
-        Map<String, OreConfig> allOres = new TreeMap<>();
+        Map<String, OreConfig> allOres = new java.util.TreeMap<>();
         config.oreXPConfig.blockConfigs.forEach((id, values) -> allOres.put(id, new OreConfig(id, values, false)));
         config.oreXPConfig.tagConfigs.forEach((tag, values) -> allOres.put(tag, new OreConfig(tag, values, true)));
         for (OreConfig ore : allOres.values()) groups.add(createOreGroup(ore, config));
@@ -242,7 +298,7 @@ public class ModConfigScreen {
                         .action((screen, opt) -> {
                             if (ore.isTag) config.oreXPConfig.tagConfigs.remove(ore.identifier);
                             else config.oreXPConfig.blockConfigs.remove(ore.identifier);
-                            refreshScreen();
+                            refreshScreen(1);
                         })
                         .build())
                 .build();
@@ -263,6 +319,7 @@ public class ModConfigScreen {
                         else config.oreXPConfig.blockConfigs.put(newIdentifier[0], values);
                         ModConfig.save();
                     }
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(1));
                 })
                 .category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
@@ -302,17 +359,24 @@ public class ModConfigScreen {
 
     private static List<OptionGroup> createDimensionGroups(ModConfig config) {
         List<OptionGroup> groups = new ArrayList<>();
-        for (String dim : new ArrayList<>(config.blockedDimensions)) {
+        for (Map.Entry<String, String> entry : new java.util.LinkedHashMap<>(config.blockedDimensions).entrySet()) {
+            String dim = entry.getKey();
             groups.add(OptionGroup.createBuilder()
                     .name(Component.literal("🌍 " + dim).withStyle(ChatFormatting.DARK_PURPLE))
                     .collapsed(false)
+                    .option(Option.<String>createBuilder()
+                            .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
+                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                            .binding("", () -> config.blockedDimensions.getOrDefault(dim, ""), value -> config.blockedDimensions.put(dim, value))
+                            .controller(StringControllerBuilder::create)
+                            .build())
                     .option(ButtonOption.createBuilder()
                             .name(Component.translatable("config.rpg_tweaks.option.remove_dimension").withStyle(ChatFormatting.RED))
                             .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.remove_dimension.desc")))
                             .text(Component.translatable("config.rpg_tweaks.button.action"))
                             .action((screen, opt) -> {
                                 config.blockedDimensions.remove(dim);
-                                refreshScreen();
+                                refreshScreen(4);
                             })
                             .build())
                     .build());
@@ -322,14 +386,16 @@ public class ModConfigScreen {
 
     private static Screen createAddGlobalDimensionScreen(ModConfig config) {
         final String[] dimensionId = {""};
+        final String[] customMsg = {""};
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("config.rpg_tweaks.add_dimension.title").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD))
                 .save(() -> {
                     String id = dimensionId[0].trim();
-                    if (!id.isEmpty() && !config.blockedDimensions.contains(id)) {
-                        config.blockedDimensions.add(id);
+                    if (!id.isEmpty() && !config.blockedDimensions.containsKey(id)) {
+                        config.blockedDimensions.put(id, customMsg[0].trim());
                         ModConfig.save();
                     }
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(4));
                 })
                 .category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
@@ -341,6 +407,12 @@ public class ModConfigScreen {
                                         Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc3"),
                                         Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc4")))
                                 .binding("", () -> dimensionId[0], value -> dimensionId[0] = value)
+                                .controller(StringControllerBuilder::create)
+                                .build())
+                        .option(Option.<String>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                                .binding("", () -> customMsg[0], value -> customMsg[0] = value)
                                 .controller(StringControllerBuilder::create)
                                 .build())
                         .build())
@@ -362,7 +434,7 @@ public class ModConfigScreen {
                             .text(Component.translatable("config.rpg_tweaks.button.action"))
                             .action((screen, opt) -> {
                                 PlayerDimensionData.removePending(entry.getKey());
-                                refreshScreen();
+                                refreshScreen(4);
                             })
                             .build())
                     .build());
@@ -388,12 +460,19 @@ public class ModConfigScreen {
 
             for (String dim : new ArrayList<>(blockedDims)) {
                 options.add(ButtonOption.createBuilder()
-                        .name(Component.literal("⛔ " + dim).withStyle(ChatFormatting.RED))
+                        .name(Component.literal("✏ ⛔ " + dim).withStyle(ChatFormatting.RED))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                        .text(Component.translatable("config.rpg_tweaks.button.action"))
+                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(
+                                createEditBlockedDimScreen(playerUUID, playerName, dim)))
+                        .build());
+                options.add(ButtonOption.createBuilder()
+                        .name(Component.literal("🗑 ⛔ " + dim).withStyle(ChatFormatting.DARK_RED))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.player_dim.remove_block.desc")))
                         .text(Component.translatable("config.rpg_tweaks.button.action").withStyle(ChatFormatting.DARK_RED))
                         .action((screen, opt) -> {
                             PlayerDimensionData.removeDimension(playerUUID, dim);
-                            refreshScreen();
+                            refreshScreen(4);
                         })
                         .build());
             }
@@ -413,7 +492,7 @@ public class ModConfigScreen {
                         .text(Component.translatable("config.rpg_tweaks.button.action").withStyle(ChatFormatting.DARK_GREEN))
                         .action((screen, opt) -> {
                             PlayerDimensionData.removeDimension(playerUUID, dim);
-                            refreshScreen();
+                            refreshScreen(4);
                         })
                         .build());
             }
@@ -424,7 +503,7 @@ public class ModConfigScreen {
                     .text(Component.translatable("config.rpg_tweaks.button.action").withStyle(ChatFormatting.DARK_RED))
                     .action((screen, opt) -> {
                         PlayerDimensionData.removeAllForPlayer(playerUUID);
-                        refreshScreen();
+                        refreshScreen(4);
                     })
                     .build());
 
@@ -441,6 +520,7 @@ public class ModConfigScreen {
         final String[] playerNameInput = {""};
         final String[] dimensionInput = {""};
         final boolean[] isAllow = {false};
+        final String[] customMessage = {""};
 
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("config.rpg_tweaks.add_player_exception.title").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
@@ -448,8 +528,22 @@ public class ModConfigScreen {
                     String name = playerNameInput[0].trim();
                     String dim = dimensionInput[0].trim();
                     if (!name.isEmpty() && !dim.isEmpty()) {
-                        PlayerDimensionData.addPending(name, dim, isAllow[0]);
+                        String msg = isAllow[0] ? "" : customMessage[0].trim();
+                        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+                        boolean applied = false;
+                        if (mc.getSingleplayerServer() != null) {
+                            net.minecraft.server.level.ServerPlayer online =
+                                    mc.getSingleplayerServer().getPlayerList().getPlayerByName(name);
+                            if (online != null) {
+                                PlayerDimensionData.setDimension(online.getUUID(), online.getName().getString(), dim, isAllow[0], msg);
+                                applied = true;
+                            }
+                        }
+                        if (!applied) {
+                            PlayerDimensionData.addPending(name, dim, isAllow[0], msg);
+                        }
                     }
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(4));
                 })
                 .category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
@@ -476,6 +570,12 @@ public class ModConfigScreen {
                                 .binding(false, () -> isAllow[0], value -> isAllow[0] = value)
                                 .controller(TickBoxControllerBuilder::create)
                                 .build())
+                        .option(Option.<String>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                                .binding("", () -> customMessage[0], value -> customMessage[0] = value)
+                                .controller(StringControllerBuilder::create)
+                                .build())
                         .build())
                 .build()
                 .generateScreen(lastParent);
@@ -483,6 +583,27 @@ public class ModConfigScreen {
 
     private static Screen createAddPlayerDimScreen(UUID playerUUID, String playerName, boolean isAllow) {
         final String[] dimensionInput = {""};
+        final String[] customMessage = {""};
+
+        ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
+                .option(Option.<String>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.add_player_exception.dimension").withStyle(ChatFormatting.YELLOW))
+                        .description(OptionDescription.of(
+                                Component.translatable("config.rpg_tweaks.add_player_exception.dimension.desc")))
+                        .binding("", () -> dimensionInput[0], value -> dimensionInput[0] = value)
+                        .controller(StringControllerBuilder::create)
+                        .build());
+
+        if (!isAllow) {
+            catBuilder.option(Option.<String>createBuilder()
+                    .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
+                    .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                    .binding("", () -> customMessage[0], value -> customMessage[0] = value)
+                    .controller(StringControllerBuilder::create)
+                    .build());
+        }
+
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable(isAllow
                                 ? "config.rpg_tweaks.add_player_dim.title_allow"
@@ -491,16 +612,30 @@ public class ModConfigScreen {
                 .save(() -> {
                     String dim = dimensionInput[0].trim();
                     if (!dim.isEmpty()) {
-                        PlayerDimensionData.setDimension(playerUUID, playerName, dim, isAllow);
+                        PlayerDimensionData.setDimension(playerUUID, playerName, dim, isAllow, isAllow ? "" : customMessage[0].trim());
                     }
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(4));
+                })
+                .category(catBuilder.build())
+                .build()
+                .generateScreen(lastParent);
+    }
+
+    private static Screen createEditBlockedDimScreen(UUID playerUUID, String playerName, String dim) {
+        String current = PlayerDimensionData.getBlockedMessage(playerUUID, dim);
+        final String[] msg = {current != null ? current : ""};
+        return YetAnotherConfigLib.createBuilder()
+                .title(Component.literal("⛔ " + dim).withStyle(ChatFormatting.RED, ChatFormatting.BOLD))
+                .save(() -> {
+                    PlayerDimensionData.setDimension(playerUUID, playerName, dim, false, msg[0].trim());
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(4));
                 })
                 .category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
                         .option(Option.<String>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.add_player_exception.dimension").withStyle(ChatFormatting.YELLOW))
-                                .description(OptionDescription.of(
-                                        Component.translatable("config.rpg_tweaks.add_player_exception.dimension.desc")))
-                                .binding("", () -> dimensionInput[0], value -> dimensionInput[0] = value)
+                                .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                                .binding("", () -> msg[0], value -> msg[0] = value)
                                 .controller(StringControllerBuilder::create)
                                 .build())
                         .build())
@@ -580,7 +715,7 @@ public class ModConfigScreen {
                         .text(Component.translatable("config.rpg_tweaks.button.action").withStyle(ChatFormatting.RED))
                         .action((screen, opt) -> {
                             config.mobLootConfig.mobDrops.remove(mobId);
-                            refreshScreen();
+                            refreshScreen(5);
                         })
                         .build())
                 .build();
@@ -596,6 +731,7 @@ public class ModConfigScreen {
                         config.mobLootConfig.mobDrops.put(id, new MobLootConfig.MobSackDrops());
                         ModConfig.save();
                     }
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(5));
                 })
                 .category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
@@ -679,7 +815,7 @@ public class ModConfigScreen {
                                 .build())
                         .build())
                 .build()
-                .generateScreen(lastParent);
+                .generateScreen(createRemovedDropsScreen(config, mobId, drops));
     }
 
     private static class OreConfig {

@@ -30,12 +30,12 @@ public class AdvancementXPHandler {
 
     @SubscribeEvent
     public static void onAdvancementEarned(AdvancementEvent.AdvancementEarnEvent event) {
-        if (!ModConfig.getInstance().blockAdvancementXP) {
-            return;
-        }
-
+        if (!ModConfig.getInstance().blockAdvancementXP) return;
         if (event.getEntity() instanceof ServerPlayer player) {
-            restoreXPSnapshot(player, event.getAdvancement().id().toString());
+            net.minecraft.advancements.AdvancementType type = event.getAdvancement().value().display()
+                    .map(d -> d.getType())
+                    .orElse(net.minecraft.advancements.AdvancementType.TASK);
+            restoreXPSnapshot(player, event.getAdvancement().id().toString(), type);
         }
     }
 
@@ -58,21 +58,21 @@ public class AdvancementXPHandler {
         }
     }
 
-    private static void restoreXPSnapshot(ServerPlayer player, String advancementId) {
+    private static void restoreXPSnapshot(ServerPlayer player, String advancementId, net.minecraft.advancements.AdvancementType type) {
         XPSnapshot snapshot = xpSnapshots.remove(player.getUUID());
-
-        if (snapshot == null) {
-            return;
-        }
+        if (snapshot == null) return;
 
         player.experienceLevel = snapshot.level;
         player.experienceProgress = snapshot.progress;
         player.totalExperience = snapshot.totalXP;
 
-        int reward = ModConfig.getInstance().advancementXPReward;
-        if (reward > 0) {
-            player.giveExperiencePoints(reward);
-        }
+        int reward = switch (type) {
+            case GOAL -> ModConfig.getInstance().goalXPReward;
+            case CHALLENGE -> ModConfig.getInstance().challengeXPReward;
+            default -> ModConfig.getInstance().advancementXPReward;
+        };
+
+        if (reward > 0) player.giveExperiencePoints(reward);
 
         player.connection.send(
                 new net.minecraft.network.protocol.game.ClientboundSetExperiencePacket(
@@ -83,11 +83,12 @@ public class AdvancementXPHandler {
         );
 
         if (ModConfig.getInstance().logXPBlocking) {
-            LOGGER.info("XP locked from advancement '{}' for {}. XP restored to: Level={}, Progress={:.2f}%, Total={}",
+            LOGGER.info("XP locked from advancement '{}' [{}] for {}. Restored: Level={}, Progress={}%, Total={}",
                     advancementId,
+                    type.name(),
                     player.getName().getString(),
                     snapshot.level,
-                    snapshot.progress * 100,
+                    String.format("%.2f", snapshot.progress * 100),
                     snapshot.totalXP
             );
         }

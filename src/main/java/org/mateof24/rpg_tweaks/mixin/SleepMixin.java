@@ -40,30 +40,19 @@ public class SleepMixin {
     }
 
     @Inject(method = "stopSleepInBed", at = @At("TAIL"))
-    private void healOnWakeUp(boolean wakeImmediately, boolean updateLevel, CallbackInfo ci) {
-        float percent = ModConfig.getInstance().sleepHealPercent;
-        if (percent <= 0f) return;
-
+    private void onWakeUp(boolean wakeImmediately, boolean updateLevel, CallbackInfo ci) {
         Player player = (Player)(Object)this;
         if (player.level().isClientSide()) return;
         if (!(player instanceof ServerPlayer)) return;
 
-        float maxHealth = player.getMaxHealth();
-        float healAmount = maxHealth * (percent / 100f);
-        player.heal(healAmount);
-    }
+        float healPercent = ModConfig.getInstance().sleepHealPercent;
+        if (healPercent > 0f) {
+            player.heal(player.getMaxHealth() * (healPercent / 100f));
+        }
 
-    @Inject(method = "stopSleepInBed", at = @At("TAIL"))
-    private void hungerOnWakeUp(boolean wakeImmediately, boolean updateLevel, CallbackInfo ci) {
         int points = ModConfig.getInstance().sleepHungerPoints;
         float chance = ModConfig.getInstance().sleepHungerChance;
-        if (points <= 0 || chance <= 0f) return;
-
-        Player player = (Player)(Object)this;
-        if (player.level().isClientSide()) return;
-        if (!(player instanceof ServerPlayer)) return;
-
-        if (player.level().random.nextFloat() * 100f < chance) {
+        if (points > 0 && chance > 0f && player.level().random.nextFloat() * 100f < chance) {
             FoodData food = player.getFoodData();
             food.setFoodLevel(Math.max(0, food.getFoodLevel() - points));
         }
