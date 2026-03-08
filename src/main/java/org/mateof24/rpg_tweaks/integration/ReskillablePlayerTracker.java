@@ -93,7 +93,7 @@ public class ReskillablePlayerTracker {
 
         try {
             Class<?> skillModelClass = Class.forName("net.bandit.reskillable.common.capabilities.SkillModel");
-            Class<?> skillEnumClass  = Class.forName("net.bandit.reskillable.common.commands.skills.Skill");
+            Class<?> skillEnumClass = Class.forName("net.bandit.reskillable.common.skills.Skill");
 
             Method gm = skillModelClass.getMethod("get", Player.class);
             Method gl = skillModelClass.getMethod("getSkillLevel", skillEnumClass);
