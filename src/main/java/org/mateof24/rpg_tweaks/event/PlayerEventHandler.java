@@ -23,6 +23,7 @@ public class PlayerEventHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             AdvancementXPHandler.clearPlayerSnapshot(player);
             DimensionBlockHandler.clearPlayer(player);
+            org.mateof24.rpg_tweaks.integration.ReskillablePlayerTracker.clearPlayer(player.getUUID());
         }
     }
 }

@@ -144,5 +144,6 @@ public class ModConfig {
         LOGGER.info("Reloading settings...");
         load();
         org.mateof24.rpg_tweaks.event.OreXPHandler.invalidateCache();
+        org.mateof24.rpg_tweaks.integration.ReskillableSkillCache.load();
     }
 }

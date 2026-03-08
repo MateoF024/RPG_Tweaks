@@ -73,6 +73,7 @@ public class RPG_Tweaks {
             LOGGER.info("Use /rpg_tweaks skills add <skill> <level> ... <item>");
             LOGGER.info("Use /rpg_tweaks craftskills add <skill> <level> ... <item>");
             LOGGER.info("=============================================");
+            org.mateof24.rpg_tweaks.integration.ReskillableSkillCache.load();
         } else {
             LOGGER.info("Reskillable Reimagined not detected - Skill lock commands unavailable");
         }
@@ -116,6 +117,19 @@ public class RPG_Tweaks {
             }
         }
     }
+
+    @EventBusSubscriber(modid = MODID, bus = EventBusSubscriber.Bus.MOD)
+    public static class CommonModEvents {
+        @SubscribeEvent
+        public static void onRegisterPayloads(net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent event) {
+            event.registrar("1").playToClient(
+                    org.mateof24.rpg_tweaks.network.S2CUnlockNotificationPacket.TYPE,
+                    org.mateof24.rpg_tweaks.network.S2CUnlockNotificationPacket.STREAM_CODEC,
+                    org.mateof24.rpg_tweaks.network.S2CUnlockNotificationPacket::handle
+            );
+        }
+    }
+
 
     @EventBusSubscriber(modid = MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static class ClientModEvents {
