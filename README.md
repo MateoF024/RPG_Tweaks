@@ -1,17 +1,27 @@
 # RPG-Tweaks
 
+<div align="center">
+
+[![CurseForge Downloads](https://img.shields.io/curseforge/dt/1476807?logo=curseforge&label=CurseForge&color=F16436&style=for-the-badge)](https://www.curseforge.com/minecraft/mc-mods/rpg-tweaks)
+[![Modrinth Downloads](https://img.shields.io/modrinth/dt/rpg_tweaks?logo=modrinth&label=Modrinth&color=00AF5C&style=for-the-badge)](https://modrinth.com/mod/rpg_tweaks)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.1--1.21.8-62B47A?logo=minecraft&style=for-the-badge)](https://minecraft.net)
+[![NeoForge](https://img.shields.io/badge/Loader-NeoForge-D16600?logo=neoforge&style=for-the-badge)](https://neoforged.net)
+
+</div>
+
 RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality for RPG servers/modpacks.
 
 ## 🚀 Features
 
 #### **Advancement XP Blocking**
-- Configurable custom XP reward per advancement
+- Configurable custom XP reward per advancement, split by type: **Task**, **Goal**, and **Challenge**
 - Optional debug logs
 
 #### **Award Custom XP When Mining Mineral Blocks**
 - Award experience orbs (points) when mining ores.
 - IDs or tags can be configured for each additional block. By default, tags are configured for vanilla minerals.
 - Experience is calculated between a minimum and maximum value, awarding the amount randomly.
+- Optional **Fortune bonus**: configurable XP multiplier applied per Fortune enchantment level.
 - Optional debug logs.
 
 #### **Player Mechanics**
@@ -28,6 +38,7 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 
 #### **Dimension Blocking**
 - Block player access to specific dimensions globally via config or command.
+- **Custom block message** per dimension (overrides default message).
 - Per-player exceptions: individually allow or block dimensions for specific players, overriding global rules.
 - Pending exceptions: configure an exception for an offline player — it will be applied the next time they connect.
 - Commands: `/rpg_tweaks dimension block/allow <dimension> <player>`
@@ -36,6 +47,7 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 #### **Custom Mob Loot (Loot Sacks)**
 - Five tiers of loot sacks that drop from mobs: **Common**, **Uncommon**, **Rare**, **Epic**, and **Legendary**.
 - Drop chances for each tier are fully configurable per mob via the config screen or JSON.
+- Optional **Looting bonus**: configurable percentage added to drop chances per Looting enchantment level (evaluated highest-tier first, always yields at most one sack).
 - Loot sacks can be opened by right-clicking to receive randomized loot from their respective loot table.
 - Loot table contents are fully customizable via the data files included in the mod.
 - Per-mob configuration also supports **removing specific vanilla drops** from a mob's loot table.
@@ -50,6 +62,7 @@ RPG-Tweaks is a mod for Minecraft NeoForge 1.21.1-1.21.8 that adds functionality
 - New command: `/rpg_tweaks skills add/remove <skill> <level> ... <item>`
 - New command: `/rpg_tweaks craftskills add/remove <skill> <level> ... <item>`
 - The `<item>` field is optional; if not specified, the desired item must be held in the main hand.
+- **Skill-up Toast Notifications:** When a player levels up a skill, any items unlocked at that level are displayed as in-game toast notifications showing the item icon and the skill/level that unlocked it.
 
 #### Integration with **Item Obliterator**
 - New command: `/rpg_tweaks banitem/unbanitem` — Adds or removes an item from the mod's ban list.
