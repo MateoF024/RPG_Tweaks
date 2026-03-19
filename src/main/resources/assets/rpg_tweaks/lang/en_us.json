@@ -279,5 +279,21 @@
   "rpg_tweaks.command.reset.category": "§aCategory '§f%s§a' reset to defaults.",
   "rpg_tweaks.command.reset.entry": "§aEntry '§f%s§a' removed.",
   "rpg_tweaks.command.reset.entry_reset": "§aEntry '§f%s§a' reset to defaults.",
-  "rpg_tweaks.command.reset.entry_not_found": "§cEntry '§f%s§c' not found."
+  "rpg_tweaks.command.reset.entry_not_found": "§cEntry '§f%s§c' not found.",
+  "config.rpg_tweaks.option.required_quest_epic": "Epic Sack Quest Requirement",
+  "config.rpg_tweaks.option.required_quest_epic.desc": "Quest ID that must be completed before Epic sacks can drop globally. Leave empty to disable. Requires FTB Quests.",
+  "config.rpg_tweaks.option.required_quest_legendary": "Legendary Sack Quest Requirement",
+  "config.rpg_tweaks.option.required_quest_legendary.desc": "Quest ID that must be completed before Legendary sacks can drop globally. Leave empty to disable. Requires FTB Quests.",
+  "config.rpg_tweaks.option.dimension_quest_req": "Required Quest to Enter",
+  "config.rpg_tweaks.option.dimension_quest_req.desc": "Quest ID that must be completed to unlock access to this dimension. Leave empty to use only the global block. Requires FTB Quests.",
+  "config.rpg_tweaks.option.manage_quest_rewards": "📋 Manage Quest Skill Rewards",
+  "config.rpg_tweaks.option.manage_quest_rewards.desc": "Configure skill levels awarded to players upon completing specific quests. Requires FTB Quests + Reskillable Reimagined.",
+  "config.rpg_tweaks.quest_rewards.title": "Quest Skill Rewards",
+  "config.rpg_tweaks.quest_rewards.add": "➕ Add Quest Reward",
+  "config.rpg_tweaks.quest_rewards.add.desc": "Add a new quest ID to reward skills upon completion.",
+  "config.rpg_tweaks.quest_rewards.add.title": "Add Quest Skill Reward",
+  "config.rpg_tweaks.quest_rewards.quest_id": "Quest ID",
+  "config.rpg_tweaks.quest_rewards.quest_id.desc": "The FTB Quests quest ID to listen for.",
+  "config.rpg_tweaks.quest_rewards.skills": "Skill Rewards",
+  "config.rpg_tweaks.quest_rewards.skills.desc": "Comma-separated list of skill:level pairs. Example: attack:10,mining:5"
 }

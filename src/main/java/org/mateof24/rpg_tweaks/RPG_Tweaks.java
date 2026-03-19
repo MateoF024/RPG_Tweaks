@@ -16,10 +16,7 @@ import org.mateof24.rpg_tweaks.command.RPGCommands;
 import org.mateof24.rpg_tweaks.config.ModConfig;
 import org.mateof24.rpg_tweaks.config.ModConfigScreen;
 import org.mateof24.rpg_tweaks.data.PlayerDimensionData;
-import org.mateof24.rpg_tweaks.integration.ReskillableCommands;
-import org.mateof24.rpg_tweaks.integration.ReskillableConfigManager;
-import org.mateof24.rpg_tweaks.integration.ItemObliteratorCommands;
-import org.mateof24.rpg_tweaks.integration.ItemObliteratorConfigManager;
+import org.mateof24.rpg_tweaks.integration.*;
 import org.mateof24.rpg_tweaks.item.ModItems;
 import org.slf4j.Logger;
 
@@ -46,6 +43,14 @@ public class RPG_Tweaks {
         logConfigStatus();
         checkReskillableIntegration();
         checkItemObliteratorIntegration();
+        if (FTBQuestsManager.isInstalled()) {
+            LOGGER.info("=== Integration with FTB Quests ===");
+            FTBQuestsQuestListener.tryRegister();
+            LOGGER.info("FTB Quests detected - Quest-based features available");
+            LOGGER.info("===================================");
+        } else {
+            LOGGER.info("FTB Quests not detected - Quest integration unavailable");
+        }
     }
 
     private void logConfigStatus() {

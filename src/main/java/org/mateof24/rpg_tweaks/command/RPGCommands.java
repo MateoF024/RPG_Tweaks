@@ -244,6 +244,7 @@ public class RPGCommands {
 
     private static void applyDimensionsDefaults(ModConfig config) {
         config.blockedDimensions = new java.util.LinkedHashMap<>();
+        config.dimensionQuestRequirements = new java.util.LinkedHashMap<>();
     }
 
     private static void applyMobLootDefaults(ModConfig config) {
@@ -252,6 +253,8 @@ public class RPGCommands {
         config.mobXPLootingBonus = 0f;
         config.mobLootConfig = new MobLootConfig();
         config.mobLootConfig.initDefaults();
+        config.requiredQuestEpic = "";
+        config.requiredQuestLegendary = "";
     }
 
     private static Iterable<String> getOreEntries() {

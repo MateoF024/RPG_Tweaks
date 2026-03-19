@@ -70,7 +70,11 @@ public class ModConfig {
     // Dimension System
     public Map<String, String> blockedDimensions = new LinkedHashMap<>();
 
-
+    // FTB Quest Integration
+    public Map<String, String> dimensionQuestRequirements = new LinkedHashMap<>();
+    public String requiredQuestEpic = "";
+    public String requiredQuestLegendary = "";
+    public Map<String, List<String>> questSkillRewards = new LinkedHashMap<>();
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -114,6 +118,10 @@ public class ModConfig {
                     drops.ensureDefaults();
                 }
                 INSTANCE.initializeDefaultOreXP();
+                if (INSTANCE.dimensionQuestRequirements == null) INSTANCE.dimensionQuestRequirements = new LinkedHashMap<>();
+                if (INSTANCE.requiredQuestEpic == null) INSTANCE.requiredQuestEpic = "";
+                if (INSTANCE.requiredQuestLegendary == null) INSTANCE.requiredQuestLegendary = "";
+                if (INSTANCE.questSkillRewards == null) INSTANCE.questSkillRewards = new LinkedHashMap<>();
             } catch (Exception e) {
                 LOGGER.error("Error loading configuration, using default values.", e);
                 INSTANCE = new ModConfig();

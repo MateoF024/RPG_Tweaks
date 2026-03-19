@@ -11,6 +11,7 @@ import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.mateof24.rpg_tweaks.config.ModConfig;
 import org.mateof24.rpg_tweaks.data.PlayerDimensionData;
+import org.mateof24.rpg_tweaks.integration.FTBQuestsManager;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,19 @@ public class DimensionBlockHandler {
     public static boolean isBlocked(ServerPlayer player, String dimension) {
         if (PlayerDimensionData.isAllowed(player.getUUID(), dimension)) return false;
         if (PlayerDimensionData.isBlocked(player.getUUID(), dimension)) return true;
-        return ModConfig.getInstance().blockedDimensions.containsKey(dimension);
+        if (!ModConfig.getInstance().blockedDimensions.containsKey(dimension)) return false;
+
+        Map<String, String> questReqs = ModConfig.getInstance().dimensionQuestRequirements;
+        if (questReqs != null && questReqs.containsKey(dimension)) {
+            String questId = questReqs.get(dimension);
+            if (questId != null && !questId.isBlank()) {
+                if (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasCompletedQuest(player, questId)) {
+                    return false;
+                }
+                return true;
+            }
+        }
+        return true;
     }
 
     private static void sendBlockedMessage(ServerPlayer player, String dimension) {

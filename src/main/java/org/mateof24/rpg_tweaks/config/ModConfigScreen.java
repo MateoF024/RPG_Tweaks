@@ -56,6 +56,12 @@ public class ModConfigScreen {
                 .name(Component.translatable("config.rpg_tweaks.category.dimensions").withStyle(ChatFormatting.DARK_PURPLE))
                 .tooltip(Component.translatable("config.rpg_tweaks.category.dimensions.tooltip"))
                 .option(ButtonOption.createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.manage_quest_rewards").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.manage_quest_rewards.desc")))
+                        .text(Component.translatable("config.rpg_tweaks.button.action"))
+                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createQuestRewardsScreen(config)))
+                        .build())
+                .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.option.add_dimension").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.add_dimension.desc")))
                         .text(Component.translatable("config.rpg_tweaks.button.action"))
@@ -100,6 +106,18 @@ public class ModConfigScreen {
                                         ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
                                         : Component.translatable("config.rpg_tweaks.option.ore_xp_fortune_bonus.value",
                                         String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<String>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.required_quest_epic").withStyle(ChatFormatting.LIGHT_PURPLE))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.required_quest_epic.desc")))
+                        .binding("", () -> config.requiredQuestEpic, value -> config.requiredQuestEpic = value.trim())
+                        .controller(StringControllerBuilder::create)
+                        .build())
+                .option(Option.<String>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.required_quest_legendary").withStyle(ChatFormatting.GOLD))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.required_quest_legendary.desc")))
+                        .binding("", () -> config.requiredQuestLegendary, value -> config.requiredQuestLegendary = value.trim())
+                        .controller(StringControllerBuilder::create)
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.option.add_mob").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
@@ -422,6 +440,16 @@ public class ModConfigScreen {
                             .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
                             .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
                             .binding("", () -> config.blockedDimensions.getOrDefault(dim, ""), value -> config.blockedDimensions.put(dim, value))
+                            .controller(StringControllerBuilder::create)
+                            .build())
+                    .option(Option.<String>createBuilder()
+                            .name(Component.translatable("config.rpg_tweaks.option.dimension_quest_req").withStyle(ChatFormatting.YELLOW))
+                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_quest_req.desc")))
+                            .binding("", () -> config.dimensionQuestRequirements.getOrDefault(dim, ""),
+                                    value -> {
+                                        if (value.trim().isEmpty()) config.dimensionQuestRequirements.remove(dim);
+                                        else config.dimensionQuestRequirements.put(dim, value.trim());
+                                    })
                             .controller(StringControllerBuilder::create)
                             .build())
                     .option(ButtonOption.createBuilder()
@@ -1036,6 +1064,101 @@ public class ModConfigScreen {
                                 .name(Component.translatable("config.rpg_tweaks.chat_blocked.add_screen.player").withStyle(ChatFormatting.YELLOW))
                                 .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.chat_blocked.add_screen.player.desc")))
                                 .binding("", () -> playerName[0], value -> playerName[0] = value)
+                                .controller(StringControllerBuilder::create)
+                                .build())
+                        .build())
+                .build()
+                .generateScreen(lastParent);
+    }
+
+    private static Screen createQuestRewardsScreen(ModConfig config) {
+        ConfigCategory.Builder categoryBuilder = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
+                .option(ButtonOption.createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.quest_rewards.add").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.quest_rewards.add.desc")))
+                        .text(Component.translatable("config.rpg_tweaks.button.action"))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(createAddQuestRewardScreen(config));
+                        })
+                        .build());
+
+        List<OptionGroup> groups = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : new LinkedHashMap<>(config.questSkillRewards).entrySet()) {
+            String questId = entry.getKey();
+            groups.add(OptionGroup.createBuilder()
+                    .name(Component.literal(questId).withStyle(ChatFormatting.AQUA))
+                    .collapsed(false)
+                    .option(Option.<String>createBuilder()
+                            .name(Component.translatable("config.rpg_tweaks.quest_rewards.skills").withStyle(ChatFormatting.YELLOW))
+                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.quest_rewards.skills.desc")))
+                            .binding(String.join(",", entry.getValue()),
+                                    () -> String.join(",", config.questSkillRewards.getOrDefault(questId, List.of())),
+                                    value -> {
+                                        List<String> skills = new ArrayList<>();
+                                        for (String s : value.split(",")) {
+                                            String trimmed = s.trim();
+                                            if (!trimmed.isEmpty()) skills.add(trimmed);
+                                        }
+                                        config.questSkillRewards.put(questId, skills);
+                                    })
+                            .controller(StringControllerBuilder::create)
+                            .build())
+                    .option(ButtonOption.createBuilder()
+                            .name(Component.translatable("config.rpg_tweaks.option.remove_entry").withStyle(ChatFormatting.RED))
+                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.remove_entry.desc")))
+                            .text(Component.translatable("config.rpg_tweaks.button.action").withStyle(ChatFormatting.RED))
+                            .action((screen, opt) -> {
+                                config.questSkillRewards.remove(questId);
+                                ModConfig.save();
+                                net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+                                mc.execute(() -> mc.setScreen(createQuestRewardsScreen(config)));
+                            })
+                            .build())
+                    .build());
+        }
+        if (!groups.isEmpty()) categoryBuilder.groups(groups);
+
+        return YetAnotherConfigLib.createBuilder()
+                .title(Component.translatable("config.rpg_tweaks.quest_rewards.title").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
+                .save(ModConfig::save)
+                .category(categoryBuilder.build())
+                .build()
+                .generateScreen(lastParent);
+    }
+
+    private static Screen createAddQuestRewardScreen(ModConfig config) {
+        final String[] questId = {""};
+        final String[] skills = {""};
+        return YetAnotherConfigLib.createBuilder()
+                .title(Component.translatable("config.rpg_tweaks.quest_rewards.add.title").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
+                .save(() -> {
+                    String id = questId[0].trim();
+                    if (!id.isEmpty()) {
+                        List<String> skillList = new ArrayList<>();
+                        for (String s : skills[0].split(",")) {
+                            String trimmed = s.trim();
+                            if (!trimmed.isEmpty()) skillList.add(trimmed);
+                        }
+                        config.questSkillRewards.put(id, skillList);
+                        ModConfig.save();
+                    }
+                    net.minecraft.client.Minecraft.getInstance().execute(() ->
+                            net.minecraft.client.Minecraft.getInstance().setScreen(createQuestRewardsScreen(config)));
+                })
+                .category(ConfigCategory.createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
+                        .option(Option.<String>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.quest_rewards.quest_id").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.quest_rewards.quest_id.desc")))
+                                .binding("", () -> questId[0], value -> questId[0] = value)
+                                .controller(StringControllerBuilder::create)
+                                .build())
+                        .option(Option.<String>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.quest_rewards.skills").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.quest_rewards.skills.desc")))
+                                .binding("", () -> skills[0], value -> skills[0] = value)
                                 .controller(StringControllerBuilder::create)
                                 .build())
                         .build())

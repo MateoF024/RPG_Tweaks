@@ -279,5 +279,21 @@
   "rpg_tweaks.command.reset.category": "§aCategoría '§f%s§a' restablecida a por defecto.",
   "rpg_tweaks.command.reset.entry": "§aEntrada '§f%s§a' eliminada.",
   "rpg_tweaks.command.reset.entry_reset": "§aEntrada '§f%s§a' restablecida a por defecto.",
-  "rpg_tweaks.command.reset.entry_not_found": "§cEntrada '§f%s§c' no encontrada."
+  "rpg_tweaks.command.reset.entry_not_found": "§cEntrada '§f%s§c' no encontrada.",
+  "config.rpg_tweaks.option.required_quest_epic": "Quest Requerida para Sacos Épicos",
+  "config.rpg_tweaks.option.required_quest_epic.desc": "ID de quest que debe completarse antes de que los sacos Épicos puedan dropearse globalmente. Vacío = desactivado. Requiere FTB Quests.",
+  "config.rpg_tweaks.option.required_quest_legendary": "Quest Requerida para Sacos Legendarios",
+  "config.rpg_tweaks.option.required_quest_legendary.desc": "ID de quest que debe completarse antes de que los sacos Legendarios puedan dropearse globalmente. Vacío = desactivado. Requiere FTB Quests.",
+  "config.rpg_tweaks.option.dimension_quest_req": "Quest Requerida para Entrar",
+  "config.rpg_tweaks.option.dimension_quest_req.desc": "ID de quest que debe completarse para desbloquear el acceso a esta dimensión. Vacío = usar solo el bloqueo global. Requiere FTB Quests.",
+  "config.rpg_tweaks.option.manage_quest_rewards": "📋 Gestionar Recompensas de Quest",
+  "config.rpg_tweaks.option.manage_quest_rewards.desc": "Configura niveles de habilidad otorgados al completar quests específicas. Requiere FTB Quests + Reskillable Reimagined.",
+  "config.rpg_tweaks.quest_rewards.title": "Recompensas de Habilidad por Quest",
+  "config.rpg_tweaks.quest_rewards.add": "➕ Agregar Recompensa de Quest",
+  "config.rpg_tweaks.quest_rewards.add.desc": "Agrega un ID de quest para recompensar habilidades al completarla.",
+  "config.rpg_tweaks.quest_rewards.add.title": "Agregar Recompensa de Habilidad por Quest",
+  "config.rpg_tweaks.quest_rewards.quest_id": "ID de Quest",
+  "config.rpg_tweaks.quest_rewards.quest_id.desc": "El ID de quest de FTB Quests a escuchar.",
+  "config.rpg_tweaks.quest_rewards.skills": "Recompensas de Habilidad",
+  "config.rpg_tweaks.quest_rewards.skills.desc": "Lista separada por comas de pares habilidad:nivel. Ejemplo: attack:10,mining:5"
 }

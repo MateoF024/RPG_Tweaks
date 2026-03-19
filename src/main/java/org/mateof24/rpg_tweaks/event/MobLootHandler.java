@@ -20,6 +20,7 @@ import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import org.mateof24.rpg_tweaks.RPG_Tweaks;
 import org.mateof24.rpg_tweaks.config.MobLootConfig;
 import org.mateof24.rpg_tweaks.config.ModConfig;
+import org.mateof24.rpg_tweaks.integration.FTBQuestsManager;
 import org.mateof24.rpg_tweaks.item.ModItems;
 
 import java.util.Iterator;
@@ -68,8 +69,16 @@ public class MobLootHandler {
         ModConfig config = ModConfig.getInstance();
         float sackBonus = lootingLevel * config.lootSackLootingBonus;
 
-        ItemStack winner = rollTier(entity, player, dropConfig.legendary, sackBonus, ModItems.LOOT_SACK_LEGENDARY.get());
-        if (winner == null) winner = rollTier(entity, player, dropConfig.epic, sackBonus, ModItems.LOOT_SACK_EPIC.get());
+        String reqEpic = config.requiredQuestEpic;
+        String reqLeg = config.requiredQuestLegendary;
+        boolean epicUnlocked = reqEpic == null || reqEpic.isBlank()
+                || (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasCompletedQuest(player, reqEpic));
+        boolean legUnlocked = reqLeg == null || reqLeg.isBlank()
+                || (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasCompletedQuest(player, reqLeg));
+
+        ItemStack winner = null;
+        if (legUnlocked) winner = rollTier(entity, player, dropConfig.legendary, sackBonus, ModItems.LOOT_SACK_LEGENDARY.get());
+        if (winner == null && epicUnlocked) winner = rollTier(entity, player, dropConfig.epic, sackBonus, ModItems.LOOT_SACK_EPIC.get());
         if (winner == null) winner = rollTier(entity, player, dropConfig.rare, sackBonus, ModItems.LOOT_SACK_RARE.get());
         if (winner == null) winner = rollTier(entity, player, dropConfig.uncommon, sackBonus, ModItems.LOOT_SACK_UNCOMMON.get());
         if (winner == null) winner = rollTier(entity, player, dropConfig.common, sackBonus, ModItems.LOOT_SACK_COMMON.get());
