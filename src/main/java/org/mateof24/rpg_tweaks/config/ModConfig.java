@@ -23,32 +23,54 @@ public class ModConfig {
 
     private static ModConfig INSTANCE;
 
+    // Advancements System
     public boolean blockAdvancementXP = true;
     public boolean logXPBlocking = false;
     public int advancementXPReward = 0;
     public int goalXPReward = 0;
     public int challengeXPReward = 0;
 
+    // Ores System
     public boolean enableCustomOreXP = true;
     public float oreXPFortuneBonus = 0.0f;
     public boolean logOreXP = false;
     public OreXPConfig oreXPConfig = new OreXPConfig();
 
+    // Player System
     public float exhaustionRateMultiplier = 1.0f;
     public float naturalRegenRateMultiplier = 1.0f;
     public float durabilityMultiplier = 0f;
     public int maxStorableXP = 0;
 
+    // PvP System
+    public boolean pvpEnabled = true;
+
+    // Sleep System
     public int sleepFromNight = 0;
     public float sleepHealPercent = 0f;
     public int sleepHungerPoints = 0;
     public float sleepHungerChance = 0f;
 
-    public boolean pvpEnabled = true;
-    public Map<String, String> blockedDimensions = new LinkedHashMap<>();
+    // Chat System
+    public boolean chatEnabled = true;
+    public java.util.List<String> chatBlockedPlayers = new ArrayList<>();
 
+    // Death System
+    public float deathXPLossPercent = 0f;
+    public boolean deathRespawnEnabled = false;
+    public int deathRespawnMinDistance = 128;
+    public int deathRespawnMaxDistance = 320;
+
+    // Mobs Systems
     public MobLootConfig mobLootConfig = new MobLootConfig();
     public float lootSackLootingBonus = 5.0f;
+    public boolean enableMobXP = false;
+    public float mobXPLootingBonus = 0f;
+
+    // Dimension System
+    public Map<String, String> blockedDimensions = new LinkedHashMap<>();
+
+
 
     public static ModConfig getInstance() {
         if (INSTANCE == null) {
@@ -57,44 +79,28 @@ public class ModConfig {
         return INSTANCE;
     }
 
+    // Default Ores XP Values
     private void initializeDefaultOreXP() {
         if (oreXPConfig == null) {
             oreXPConfig = new OreXPConfig();
         }
 
         if (oreXPConfig.blockConfigs.isEmpty() && oreXPConfig.tagConfigs.isEmpty()) {
-
-            // Coal
-            oreXPConfig.tagConfigs.put("minecraft:coal_ores", new OreXPConfig.OreXPValues(1, 3));
-
-            // Copper
-            oreXPConfig.tagConfigs.put("minecraft:copper_ores", new OreXPConfig.OreXPValues(1, 3));
-
-            // Iron
-            oreXPConfig.tagConfigs.put("minecraft:iron_ores", new OreXPConfig.OreXPValues(2, 4));
-
-            // Gold
-            oreXPConfig.tagConfigs.put("minecraft:gold_ores", new OreXPConfig.OreXPValues(2, 5));
-
-            // Redstone
-            oreXPConfig.tagConfigs.put("minecraft:redstone_ores", new OreXPConfig.OreXPValues(3, 7));
-
-            // Lapis
-            oreXPConfig.tagConfigs.put("minecraft:lapis_ores", new OreXPConfig.OreXPValues(4, 8));
-
-            // Diamond
-            oreXPConfig.tagConfigs.put("minecraft:diamond_ores", new OreXPConfig.OreXPValues(5, 12));
-
-            // Emerald
-            oreXPConfig.tagConfigs.put("minecraft:emerald_ores", new OreXPConfig.OreXPValues(5, 12));
-
-            // Quartz
-            oreXPConfig.blockConfigs.put("minecraft:nether_quartz_ore", new OreXPConfig.OreXPValues(7, 15));
+            oreXPConfig.tagConfigs.put("minecraft:coal_ores", new XPValues(0, 4));
+            oreXPConfig.tagConfigs.put("minecraft:copper_ores", new XPValues(1, 4));
+            oreXPConfig.tagConfigs.put("minecraft:iron_ores", new XPValues(2, 5));
+            oreXPConfig.tagConfigs.put("minecraft:gold_ores", new XPValues(3, 5));
+            oreXPConfig.tagConfigs.put("minecraft:redstone_ores", new XPValues(5, 7));
+            oreXPConfig.tagConfigs.put("minecraft:lapis_ores", new XPValues(5, 8));
+            oreXPConfig.tagConfigs.put("minecraft:diamond_ores", new XPValues(5, 10));
+            oreXPConfig.tagConfigs.put("minecraft:emerald_ores", new XPValues(7, 12));
+            oreXPConfig.blockConfigs.put("minecraft:nether_quartz_ore", new XPValues(8, 16));
 
             LOGGER.info("Default mineral configuration initialized with tags");
         }
     }
 
+    // Load config files
     public static void load() {
         if (Files.exists(CONFIG_PATH)) {
             try {
@@ -103,24 +109,27 @@ public class ModConfig {
                 LOGGER.info("Configuration loaded from: {}", CONFIG_PATH);
 
                 INSTANCE.validate();
-
+                if (INSTANCE.chatBlockedPlayers == null) INSTANCE.chatBlockedPlayers = new ArrayList<>();
+                for (MobLootConfig.MobSackDrops drops : INSTANCE.mobLootConfig.mobDrops.values()) {
+                    drops.ensureDefaults();
+                }
                 INSTANCE.initializeDefaultOreXP();
-                INSTANCE.mobLootConfig.initDefaults();
             } catch (Exception e) {
                 LOGGER.error("Error loading configuration, using default values.", e);
                 INSTANCE = new ModConfig();
                 INSTANCE.initializeDefaultOreXP();
-                INSTANCE.mobLootConfig.initDefaults();
                 save();
             }
         } else {
             LOGGER.info("Configuration file not found, creating a new one with default values.");
             INSTANCE = new ModConfig();
             INSTANCE.initializeDefaultOreXP();
+            INSTANCE.mobLootConfig.initDefaults();
             save();
         }
     }
 
+    // Save config files
     public static void save() {
         try {
             Files.createDirectories(CONFIG_PATH.getParent());
@@ -134,9 +143,15 @@ public class ModConfig {
         }
     }
 
+    // Validate Config Files for Ore and Mob systems
     private void validate() {
         if (oreXPConfig != null) {
             oreXPConfig.validate();
+        }
+        if (mobLootConfig != null) {
+            for (MobLootConfig.MobSackDrops drops : mobLootConfig.mobDrops.values()) {
+                if (drops.xpOnKill != null) drops.xpOnKill.validate();
+            }
         }
     }
 

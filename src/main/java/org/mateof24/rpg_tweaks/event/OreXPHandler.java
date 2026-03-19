@@ -17,6 +17,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import org.mateof24.rpg_tweaks.config.ModConfig;
 import org.mateof24.rpg_tweaks.config.OreXPConfig;
+import org.mateof24.rpg_tweaks.config.XPValues;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -25,8 +26,8 @@ import java.util.*;
 public class OreXPHandler {
 
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final java.util.Map<Block, OreXPConfig.OreXPValues> BLOCK_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
-    private static final OreXPConfig.OreXPValues NO_CONFIG = new OreXPConfig.OreXPValues();
+    private static final java.util.Map<Block, XPValues> BLOCK_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final XPValues NO_CONFIG = new XPValues();
 
     public static void invalidateCache() {
         BLOCK_CACHE.clear();
@@ -60,9 +61,9 @@ public class OreXPHandler {
 
         String blockId = block.builtInRegistryHolder().key().location().toString();
 
-        OreXPConfig.OreXPValues xpValues = BLOCK_CACHE.computeIfAbsent(block, b -> {
+        XPValues xpValues = BLOCK_CACHE.computeIfAbsent(block, b -> {
             List<String> tags = getBlockTags(b);
-            OreXPConfig.OreXPValues v = config.oreXPConfig.getConfigForBlock(blockId, tags);
+            XPValues v = config.oreXPConfig.getConfigForBlock(blockId, tags);
             return v != null ? v : NO_CONFIG;
         });
 
@@ -151,10 +152,10 @@ public class OreXPHandler {
         try {
             ModConfig config = ModConfig.getInstance();
             if (!config.enableCustomOreXP) return false;
-            OreXPConfig.OreXPValues cached = BLOCK_CACHE.computeIfAbsent(block, b -> {
+            XPValues cached = BLOCK_CACHE.computeIfAbsent(block, b -> {
                 String blockId = b.builtInRegistryHolder().key().location().toString();
                 List<String> tags = getBlockTags(b);
-                OreXPConfig.OreXPValues v = config.oreXPConfig.getConfigForBlock(blockId, tags);
+                XPValues v = config.oreXPConfig.getConfigForBlock(blockId, tags);
                 return v != null ? v : NO_CONFIG;
             });
             return cached != NO_CONFIG;

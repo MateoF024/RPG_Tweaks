@@ -1,24 +1,23 @@
 package org.mateof24.rpg_tweaks.event;
 
-import com.mojang.logging.LogUtils;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import org.mateof24.rpg_tweaks.RPG_Tweaks;
 import org.mateof24.rpg_tweaks.item.LootSackItem;
-import org.mateof24.rpg_tweaks.item.LootSackResolver;
-import org.slf4j.Logger;
 
 import java.util.List;
 
 @EventBusSubscriber(modid = RPG_Tweaks.MODID)
 public class LootSackUseHandler {
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
@@ -29,8 +28,10 @@ public class LootSackUseHandler {
         Player player = event.getEntity();
         ServerLevel serverLevel = (ServerLevel) player.level();
 
-        List<ItemStack> drops = LootSackResolver.resolve(sack.getLootTableLocation());
-        LOGGER.debug("[LootSack] Opening {} - {} items rolled", sack.getLootTableLocation(), drops.size());
+        ResourceKey<LootTable> key = sack.getLootTableKey();
+        LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(key);
+        LootParams params = new LootParams.Builder(serverLevel).create(LootContextParamSets.EMPTY);
+        List<ItemStack> drops = lootTable.getRandomItems(params);
 
         for (ItemStack drop : drops) {
             if (drop.isEmpty()) continue;

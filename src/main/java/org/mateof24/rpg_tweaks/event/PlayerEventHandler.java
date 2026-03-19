@@ -24,6 +24,7 @@ public class PlayerEventHandler {
             AdvancementXPHandler.clearPlayerSnapshot(player);
             DimensionBlockHandler.clearPlayer(player);
             org.mateof24.rpg_tweaks.integration.ReskillablePlayerTracker.clearPlayer(player.getUUID());
+            DeathRespawnHandler.clearPlayer(player.getUUID());
         }
     }
 }

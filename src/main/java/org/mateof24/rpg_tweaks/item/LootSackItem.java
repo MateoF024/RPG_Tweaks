@@ -66,6 +66,10 @@ public class LootSackItem extends Item {
         return lootTableKey.location();
     }
 
+    public ResourceKey<LootTable> getLootTableKey() {
+        return lootTableKey;
+    }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         return InteractionResultHolder.pass(player.getItemInHand(hand));
