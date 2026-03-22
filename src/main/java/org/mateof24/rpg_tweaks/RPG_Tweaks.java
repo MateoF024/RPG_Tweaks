@@ -32,8 +32,10 @@ public class RPG_Tweaks {
         PlayerDimensionData.load();
         ModItems.ITEMS.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
-        modContainer.registerExtensionPoint(IConfigScreenFactory.class,
-                (container, parent) -> ModConfigScreen.createConfigScreen(parent));
+        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+            modContainer.registerExtensionPoint(IConfigScreenFactory.class,
+                    (container, parent) -> ModConfigScreen.createConfigScreen(parent));
+        }
 
         LOGGER.info("RPG Tweaks initialized correctly");
     }
