@@ -94,6 +94,7 @@ public class MobLootConfig {
                 "minecraft:witch",
                 "minecraft:wither_skeleton",
                 "minecraft:zoglin",
+                "minecraft:zombified_piglin",
                 "minecraft:zombie",
                 "minecraft:zombie_villager"
         );

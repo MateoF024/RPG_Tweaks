@@ -285,7 +285,6 @@
   "config.rpg_tweaks.option.required_quest_legendary": "Legendary Sack Quest Requirement",
   "config.rpg_tweaks.option.required_quest_legendary.desc": "Quest ID that must be completed before Legendary sacks can drop globally. Leave empty to disable. Requires FTB Quests.",
   "config.rpg_tweaks.option.dimension_quest_req": "Required Quest to Enter",
-  "config.rpg_tweaks.option.dimension_quest_req.desc": "Quest ID that must be completed to unlock access to this dimension. Leave empty to use only the global block. Requires FTB Quests.",
   "config.rpg_tweaks.option.manage_quest_rewards": "📋 Manage Quest Skill Rewards",
   "config.rpg_tweaks.option.manage_quest_rewards.desc": "Configure skill levels awarded to players upon completing specific quests. Requires FTB Quests + Reskillable Reimagined.",
   "config.rpg_tweaks.quest_rewards.title": "Quest Skill Rewards",
@@ -295,5 +294,9 @@
   "config.rpg_tweaks.quest_rewards.quest_id": "Quest ID",
   "config.rpg_tweaks.quest_rewards.quest_id.desc": "The FTB Quests quest ID to listen for.",
   "config.rpg_tweaks.quest_rewards.skills": "Skill Rewards",
-  "config.rpg_tweaks.quest_rewards.skills.desc": "Comma-separated list of skill:level pairs. Example: attack:10,mining:5"
+  "config.rpg_tweaks.quest_rewards.skills.desc": "Comma-separated list of skill:level pairs. Example: attack:10,mining:5",
+  "config.rpg_tweaks.quest_rewards.reward_id": "Reward ID",
+  "config.rpg_tweaks.quest_rewards.reward_id.desc": "The FTB Quests reward ID (hex value shown in the quest editor). When this reward is claimed, the skills below are granted.",
+  "config.rpg_tweaks.option.dimension_quest_req.desc": "Reward ID that, when claimed, grants this player personal access to this dimension. Leave empty to disable. Requires FTB Quests.",
+  "rpg_tweaks.reskillable.error.entity_required": "§cYou must specify an entity ID in the command."
 }

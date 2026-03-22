@@ -22,19 +22,17 @@ import java.util.List;
 
 public class ReskillableCommands {
 
-    private static final List<String> VALID_SKILLS = List.of(
-            "attack", "defense", "mining", "gathering",
-            "farming", "building", "agility", "magic"
-    );
-
-    private static final SuggestionProvider<CommandSourceStack> SKILL_SUGGESTIONS = (context, builder) ->
-            SharedSuggestionProvider.suggest(VALID_SKILLS, builder);
+    private static final SuggestionProvider<CommandSourceStack> SKILL_SUGGESTIONS =
+            (context, builder) -> SharedSuggestionProvider.suggest(
+                    ReskillableConfigManager.getAllValidSkillIds(), builder);
 
     private static final SuggestionProvider<CommandSourceStack> ITEM_SUGGESTIONS =
             (context, builder) -> SharedSuggestionProvider.suggest(
-                    BuiltInRegistries.ITEM.keySet().stream().map(ResourceLocation::toString),
-                    builder
-            );
+                    BuiltInRegistries.ITEM.keySet().stream().map(ResourceLocation::toString), builder);
+
+    private static final SuggestionProvider<CommandSourceStack> ENTITY_SUGGESTIONS =
+            (context, builder) -> SharedSuggestionProvider.suggest(
+                    BuiltInRegistries.ENTITY_TYPE.keySet().stream().map(ResourceLocation::toString), builder);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
@@ -42,6 +40,7 @@ public class ReskillableCommands {
                         .requires(source -> source.hasPermission(2))
                         .then(registerSkillsCommand())
                         .then(registerCraftSkillsCommand())
+                        .then(registerAttackSkillsCommand())
         );
     }
 
@@ -50,23 +49,17 @@ public class ReskillableCommands {
                 .then(Commands.literal("add")
                         .then(Commands.argument("requirements", StringArgumentType.greedyString())
                                 .suggests(SKILL_SUGGESTIONS)
-                                .executes(context -> executeAdd(context, ConfigType.SKILL_LOCKS))
-                        )
-                )
+                                .executes(context -> executeAdd(context, ConfigType.SKILL_LOCKS))))
                 .then(Commands.literal("remove")
                         .then(Commands.argument("item", ResourceLocationArgument.id())
                                 .suggests(ITEM_SUGGESTIONS)
-                                .executes(context -> executeRemove(context, ConfigType.SKILL_LOCKS, true))
-                        )
-                        .executes(context -> executeRemove(context, ConfigType.SKILL_LOCKS, false))
-                )
+                                .executes(context -> executeRemove(context, ConfigType.SKILL_LOCKS, true)))
+                        .executes(context -> executeRemove(context, ConfigType.SKILL_LOCKS, false)))
                 .then(Commands.literal("info")
                         .then(Commands.argument("item", ResourceLocationArgument.id())
                                 .suggests(ITEM_SUGGESTIONS)
-                                .executes(context -> executeInfo(context, ConfigType.SKILL_LOCKS, true))
-                        )
-                        .executes(context -> executeInfo(context, ConfigType.SKILL_LOCKS, false))
-                );
+                                .executes(context -> executeInfo(context, ConfigType.SKILL_LOCKS, true)))
+                        .executes(context -> executeInfo(context, ConfigType.SKILL_LOCKS, false)));
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> registerCraftSkillsCommand() {
@@ -74,62 +67,68 @@ public class ReskillableCommands {
                 .then(Commands.literal("add")
                         .then(Commands.argument("requirements", StringArgumentType.greedyString())
                                 .suggests(SKILL_SUGGESTIONS)
-                                .executes(context -> executeCraftAdd(context, ConfigType.CRAFT_LOCKS))
-                        )
-                )
+                                .executes(context -> executeAdd(context, ConfigType.CRAFT_LOCKS))))
                 .then(Commands.literal("remove")
                         .then(Commands.argument("item", ResourceLocationArgument.id())
                                 .suggests(ITEM_SUGGESTIONS)
-                                .executes(context -> executeRemove(context, ConfigType.CRAFT_LOCKS, true))
-                        )
-                        .executes(context -> executeRemove(context, ConfigType.CRAFT_LOCKS, false))
-                )
+                                .executes(context -> executeRemove(context, ConfigType.CRAFT_LOCKS, true)))
+                        .executes(context -> executeRemove(context, ConfigType.CRAFT_LOCKS, false)))
                 .then(Commands.literal("info")
                         .then(Commands.argument("item", ResourceLocationArgument.id())
                                 .suggests(ITEM_SUGGESTIONS)
-                                .executes(context -> executeInfo(context, ConfigType.CRAFT_LOCKS, true))
-                        )
-                        .executes(context -> executeInfo(context, ConfigType.CRAFT_LOCKS, false))
-                );
+                                .executes(context -> executeInfo(context, ConfigType.CRAFT_LOCKS, true)))
+                        .executes(context -> executeInfo(context, ConfigType.CRAFT_LOCKS, false)));
     }
 
-    private static String getItemId(CommandContext<CommandSourceStack> context, boolean hasItemArg)
+    private static LiteralArgumentBuilder<CommandSourceStack> registerAttackSkillsCommand() {
+        return Commands.literal("attackskills")
+                .then(Commands.literal("add")
+                        .then(Commands.argument("requirements", StringArgumentType.greedyString())
+                                .suggests(SKILL_SUGGESTIONS)
+                                .executes(context -> executeAttackAdd(context, ConfigType.ATTACK_LOCKS))))
+                .then(Commands.literal("remove")
+                        .then(Commands.argument("entity", ResourceLocationArgument.id())
+                                .suggests(ENTITY_SUGGESTIONS)
+                                .executes(context -> executeAttackRemove(context, ConfigType.ATTACK_LOCKS, true)))
+                        .executes(context -> executeAttackRemove(context, ConfigType.ATTACK_LOCKS, false)))
+                .then(Commands.literal("info")
+                        .then(Commands.argument("entity", ResourceLocationArgument.id())
+                                .suggests(ENTITY_SUGGESTIONS)
+                                .executes(context -> executeAttackInfo(context, ConfigType.ATTACK_LOCKS, true)))
+                        .executes(context -> executeAttackInfo(context, ConfigType.ATTACK_LOCKS, false)));
+    }
+
+    private static String getItemId(CommandContext<CommandSourceStack> context, boolean hasArg)
             throws CommandSyntaxException {
-        if (hasItemArg) {
-            return ResourceLocationArgument.getId(context, "item").toString();
-        }
-
+        if (hasArg) return ResourceLocationArgument.getId(context, "item").toString();
         CommandSourceStack source = context.getSource();
+        if (!(source.getEntity() instanceof ServerPlayer player))
+            throw new CommandSyntaxException(null, Component.translatable("rpg_tweaks.command.error.players_only"));
+        ItemStack held = player.getMainHandItem();
+        if (held.isEmpty())
+            throw new CommandSyntaxException(null, Component.translatable("rpg_tweaks.command.error.hand_empty"));
+        return BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
+    }
 
-        if (!(source.getEntity() instanceof ServerPlayer player)) {
-            throw new CommandSyntaxException(null,
-                    Component.translatable("rpg_tweaks.command.error.players_only"));
-        }
-
-        ItemStack heldItem = player.getMainHandItem();
-
-        if (heldItem.isEmpty()) {
-            throw new CommandSyntaxException(null,
-                    Component.translatable("rpg_tweaks.command.error.hand_empty"));
-        }
-
-        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(heldItem.getItem());
-        return itemId.toString();
+    private static String getEntityId(CommandContext<CommandSourceStack> context, boolean hasArg)
+            throws CommandSyntaxException {
+        if (hasArg) return ResourceLocationArgument.getId(context, "entity").toString();
+        throw new CommandSyntaxException(null,
+                Component.translatable("rpg_tweaks.reskillable.error.entity_required"));
     }
 
     private static int executeAdd(CommandContext<CommandSourceStack> context, ConfigType type) {
-        String fullInput = StringArgumentType.getString(context, "requirements");
-        return processAddCommand(context.getSource(), fullInput, type, context);
+        return processAddCommand(context.getSource(),
+                StringArgumentType.getString(context, "requirements"), type, false);
     }
 
-    private static int executeCraftAdd(CommandContext<CommandSourceStack> context, ConfigType type) {
-        String fullInput = StringArgumentType.getString(context, "requirements");
-        return processAddCommand(context.getSource(), fullInput, type, context);
+    private static int executeAttackAdd(CommandContext<CommandSourceStack> context, ConfigType type) {
+        return processAddCommand(context.getSource(),
+                StringArgumentType.getString(context, "requirements"), type, true);
     }
 
     private static int processAddCommand(CommandSourceStack source, String fullInput,
-                                         ConfigType type,
-                                         CommandContext<CommandSourceStack> context) {
+                                         ConfigType type, boolean useEntityId) {
         try {
             if (!ReskillableConfigManager.isReskillableInstalled()) {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed"));
@@ -137,70 +136,64 @@ public class ReskillableCommands {
             }
 
             String[] parts = fullInput.trim().split("\\s+");
-
             if (parts.length < 2) {
-                String subCmd = type == ConfigType.CRAFT_LOCKS ? "craftskills" : "skills";
+                String subCmd = type == ConfigType.CRAFT_LOCKS ? "craftskills"
+                        : type == ConfigType.ATTACK_LOCKS ? "attackskills" : "skills";
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.usage.add", subCmd));
-                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.usage.example_full"));
-                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.usage.example_hand"));
                 return 0;
             }
 
-            String itemId = null;
+            String targetId = null;
             int endIndex = parts.length;
+            List<String> validSkills = ReskillableConfigManager.getAllValidSkillIds();
 
             if (parts[parts.length - 1].contains(":")) {
-                itemId = parts[parts.length - 1];
+                targetId = parts[parts.length - 1];
                 endIndex = parts.length - 1;
             }
 
-            if (itemId == null) {
+            if (targetId == null) {
+                if (useEntityId) {
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.entity_required"));
+                    return 0;
+                }
                 try {
                     if (!(source.getEntity() instanceof ServerPlayer player)) {
                         source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.need_player"));
                         return 0;
                     }
-
-                    ItemStack heldItem = player.getMainHandItem();
-
-                    if (heldItem.isEmpty()) {
+                    ItemStack held = player.getMainHandItem();
+                    if (held.isEmpty()) {
                         source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.hand_empty"));
-                        source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.hand_example"));
                         return 0;
                     }
-
-                    ResourceLocation itemIdRes = BuiltInRegistries.ITEM.getKey(heldItem.getItem());
-                    itemId = itemIdRes.toString();
-
+                    targetId = BuiltInRegistries.ITEM.getKey(held.getItem()).toString();
                 } catch (Exception e) {
                     source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.hand_get_error", e.getMessage()));
                     return 0;
                 }
             }
 
-            if (!ReskillableConfigManager.isValidItemId(itemId)) {
-                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", itemId));
-                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.item_format_hint"));
+            if (!ReskillableConfigManager.isValidItemId(targetId)) {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", targetId));
                 return 0;
             }
 
             List<String> skillRequirements = new ArrayList<>();
-
             for (int i = 0; i < endIndex; i += 2) {
                 if (i + 1 >= endIndex) {
                     source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.skill_no_level", parts[i]));
                     return 0;
                 }
-
-                String skill = parts[i].toLowerCase();
+                String skill = parts[i].toLowerCase(java.util.Locale.ROOT);
                 String levelStr = parts[i + 1];
 
-                if (!VALID_SKILLS.contains(skill)) {
+                if (!validSkills.contains(skill)) {
                     source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_skill", skill));
-                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.valid_skills", String.join(", ", VALID_SKILLS)));
+                    source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.valid_skills",
+                            String.join(", ", validSkills)));
                     return 0;
                 }
-
                 int level;
                 try {
                     level = Integer.parseInt(levelStr);
@@ -212,7 +205,6 @@ public class ReskillableCommands {
                     source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_level_nan", levelStr));
                     return 0;
                 }
-
                 skillRequirements.add(skill + ":" + level);
             }
 
@@ -221,57 +213,46 @@ public class ReskillableCommands {
                 return 0;
             }
 
-            boolean success = ReskillableConfigManager.addItemSkillLock(type, itemId, skillRequirements);
-
+            boolean success = ReskillableConfigManager.addItemSkillLock(type, targetId, skillRequirements);
             if (success) {
-                final String finalItemId = itemId;
-                final List<String> finalReqs = skillRequirements;
+                final String fId = targetId;
+                final List<String> fReqs = skillRequirements;
                 source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.added", type.filename), true);
-                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", finalItemId), false);
-                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements", String.join(", ", finalReqs)), false);
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", fId), false);
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements",
+                        String.join(", ", fReqs)), false);
                 return 1;
             } else {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.add_failed"));
                 return 0;
             }
-
         } catch (Exception e) {
             source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.unexpected", e.getMessage()));
-            e.printStackTrace();
             return 0;
         }
     }
 
-    private static int executeRemove(CommandContext<CommandSourceStack> context, ConfigType type, boolean hasItemArg) {
+    private static int executeRemove(CommandContext<CommandSourceStack> context, ConfigType type, boolean hasArg) {
         CommandSourceStack source = context.getSource();
-
         try {
             if (!ReskillableConfigManager.isReskillableInstalled()) {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed_short"));
                 return 0;
             }
-
-            String itemId = getItemId(context, hasItemArg);
-
+            String itemId = getItemId(context, hasArg);
             if (!ReskillableConfigManager.isValidItemId(itemId)) {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", itemId));
                 return 0;
             }
-
             boolean success = ReskillableConfigManager.removeItemSkillLock(type, itemId);
-
             if (success) {
-                final String finalItemId = itemId;
-                source.sendSuccess(
-                        () -> Component.translatable("rpg_tweaks.reskillable.success.removed", type.filename, finalItemId),
-                        true
-                );
+                final String fId = itemId;
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.removed", type.filename, fId), true);
                 return 1;
             } else {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.remove_failed", type.filename));
                 return 0;
             }
-
         } catch (CommandSyntaxException e) {
             source.sendFailure((Component) e.getRawMessage());
             return 0;
@@ -281,36 +262,91 @@ public class ReskillableCommands {
         }
     }
 
-    private static int executeInfo(CommandContext<CommandSourceStack> context, ConfigType type, boolean hasItemArg) {
+    private static int executeAttackRemove(CommandContext<CommandSourceStack> context, ConfigType type, boolean hasArg) {
         CommandSourceStack source = context.getSource();
-
         try {
             if (!ReskillableConfigManager.isReskillableInstalled()) {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed_short"));
                 return 0;
             }
+            String entityId = getEntityId(context, hasArg);
+            if (!ReskillableConfigManager.isValidItemId(entityId)) {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", entityId));
+                return 0;
+            }
+            boolean success = ReskillableConfigManager.removeItemSkillLock(type, entityId);
+            if (success) {
+                final String fId = entityId;
+                source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.removed", type.filename, fId), true);
+                return 1;
+            } else {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.remove_failed", type.filename));
+                return 0;
+            }
+        } catch (CommandSyntaxException e) {
+            source.sendFailure((Component) e.getRawMessage());
+            return 0;
+        } catch (Exception e) {
+            source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.generic", e.getMessage()));
+            return 0;
+        }
+    }
 
-            String itemId = getItemId(context, hasItemArg);
-
+    private static int executeInfo(CommandContext<CommandSourceStack> context, ConfigType type, boolean hasArg) {
+        CommandSourceStack source = context.getSource();
+        try {
+            if (!ReskillableConfigManager.isReskillableInstalled()) {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed_short"));
+                return 0;
+            }
+            String itemId = getItemId(context, hasArg);
             if (!ReskillableConfigManager.isValidItemId(itemId)) {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", itemId));
                 return 0;
             }
-
             List<String> requirements = ReskillableConfigManager.getItemSkillLock(type, itemId);
-
             if (requirements == null || requirements.isEmpty()) {
                 source.sendFailure(Component.translatable("rpg_tweaks.reskillable.info.no_requirements", itemId, type.filename));
                 return 0;
             }
-
-            final String finalItemId = itemId;
+            final String fId = itemId;
             source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.info.header", type.filename), false);
-            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", finalItemId), false);
-            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements", String.join(", ", requirements)), false);
-
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", fId), false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements",
+                    String.join(", ", requirements)), false);
             return 1;
+        } catch (CommandSyntaxException e) {
+            source.sendFailure((Component) e.getRawMessage());
+            return 0;
+        } catch (Exception e) {
+            source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.generic", e.getMessage()));
+            return 0;
+        }
+    }
 
+    private static int executeAttackInfo(CommandContext<CommandSourceStack> context, ConfigType type, boolean hasArg) {
+        CommandSourceStack source = context.getSource();
+        try {
+            if (!ReskillableConfigManager.isReskillableInstalled()) {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.not_installed_short"));
+                return 0;
+            }
+            String entityId = getEntityId(context, hasArg);
+            if (!ReskillableConfigManager.isValidItemId(entityId)) {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.error.invalid_item", entityId));
+                return 0;
+            }
+            List<String> requirements = ReskillableConfigManager.getItemSkillLock(type, entityId);
+            if (requirements == null || requirements.isEmpty()) {
+                source.sendFailure(Component.translatable("rpg_tweaks.reskillable.info.no_requirements", entityId, type.filename));
+                return 0;
+            }
+            final String fId = entityId;
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.info.header", type.filename), false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.item", fId), false);
+            source.sendSuccess(() -> Component.translatable("rpg_tweaks.reskillable.success.requirements",
+                    String.join(", ", requirements)), false);
+            return 1;
         } catch (CommandSyntaxException e) {
             source.sendFailure((Component) e.getRawMessage());
             return 0;

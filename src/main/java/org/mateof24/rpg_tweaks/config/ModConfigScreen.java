@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.ChatFormatting;
 import org.mateof24.rpg_tweaks.data.PlayerDimensionData;
+import org.mateof24.rpg_tweaks.integration.FTBQuestsManager;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ public class ModConfigScreen {
     public static Screen createConfigScreen(Screen parent) {
         if (parent != null) lastParent = parent;
         ModConfig config = ModConfig.getInstance();
+        boolean ftbInstalled = FTBQuestsManager.isInstalled();
 
         ConfigCategory.Builder oreCategoryBuilder = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.rpg_tweaks.category.ore_xp").withStyle(ChatFormatting.AQUA))
@@ -52,15 +54,105 @@ public class ModConfigScreen {
         List<OptionGroup> oreGroups = createOreGroups(config);
         if (!oreGroups.isEmpty()) oreCategoryBuilder.groups(oreGroups);
 
+        ConfigCategory.Builder playerCategoryBuilder = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.rpg_tweaks.category.player").withStyle(ChatFormatting.GREEN))
+                .tooltip(Component.translatable("config.rpg_tweaks.category.player.tooltip"))
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.exhaustion_rate"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.exhaustion_rate.desc")))
+                        .binding(1.0f, () -> config.exhaustionRateMultiplier, value -> config.exhaustionRateMultiplier = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.0f, 5.0f).step(0.1f)
+                                .formatValue(v -> Component.translatable("config.rpg_tweaks.value.multiplier", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.regen_rate"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.regen_rate.desc")))
+                        .binding(1.0f, () -> config.naturalRegenRateMultiplier, value -> config.naturalRegenRateMultiplier = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.0f, 5.0f).step(0.1f)
+                                .formatValue(v -> Component.translatable("config.rpg_tweaks.value.multiplier", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.durability"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.durability.desc")))
+                        .binding(0f, () -> config.durabilityMultiplier, value -> config.durabilityMultiplier = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(-1.0f, 5.0f).step(0.1f)
+                                .formatValue(v -> {
+                                    if (v == -1f) return Component.translatable("config.rpg_tweaks.option.durability.no_loss").withStyle(ChatFormatting.GREEN);
+                                    if (v == 0f) return Component.translatable("config.rpg_tweaks.option.durability.vanilla").withStyle(ChatFormatting.GRAY);
+                                    return Component.translatable("config.rpg_tweaks.value.multiplier", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW);
+                                }))
+                        .build())
+                .option(Option.<Integer>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.max_xp_cap"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.max_xp_cap.desc")))
+                        .binding(0, () -> config.maxStorableXP, value -> config.maxStorableXP = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100000).step(100)
+                                .formatValue(v -> v == 0
+                                        ? Component.translatable("config.rpg_tweaks.option.max_xp_cap.unlimited").withStyle(ChatFormatting.GREEN)
+                                        : Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<Boolean>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.pvp"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.pvp.desc")))
+                        .binding(true, () -> config.pvpEnabled, value -> config.pvpEnabled = value)
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+                .option(Option.<Boolean>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.chat_enabled"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.chat_enabled.desc")))
+                        .binding(true, () -> config.chatEnabled, value -> config.chatEnabled = value)
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+                .option(ButtonOption.createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.manage_chat_blocked").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.manage_chat_blocked.desc")))
+                        .text(Component.translatable("config.rpg_tweaks.button.action"))
+                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createChatBlockedScreen(config)))
+                        .build())
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.death_xp_loss"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_xp_loss.desc")))
+                        .binding(0f, () -> config.deathXPLossPercent, value -> config.deathXPLossPercent = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0f, 100f).step(1f)
+                                .formatValue(v -> v == 0f
+                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                        : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.0f", v)).withStyle(ChatFormatting.RED)))
+                        .build())
+                .option(Option.<Boolean>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.death_respawn_enabled"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_respawn_enabled.desc")))
+                        .binding(false, () -> config.deathRespawnEnabled, value -> config.deathRespawnEnabled = value)
+                        .controller(TickBoxControllerBuilder::create)
+                        .build())
+                .option(Option.<Integer>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.death_respawn_min_dist"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_respawn_min_dist.desc")))
+                        .binding(128, () -> config.deathRespawnMinDistance, value -> config.deathRespawnMinDistance = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 2000).step(10)
+                                .formatValue(v -> Component.translatable("config.rpg_tweaks.option.death_respawn_dist.value", v).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<Integer>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.death_respawn_max_dist"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_respawn_max_dist.desc")))
+                        .binding(320, () -> config.deathRespawnMaxDistance, value -> config.deathRespawnMaxDistance = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 2000).step(10)
+                                .formatValue(v -> Component.translatable("config.rpg_tweaks.option.death_respawn_dist.value", v).withStyle(ChatFormatting.YELLOW)))
+                        .build());
+
+        if (ftbInstalled) {
+            playerCategoryBuilder.option(ButtonOption.createBuilder()
+                    .name(Component.translatable("config.rpg_tweaks.option.manage_quest_rewards").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
+                    .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.manage_quest_rewards.desc")))
+                    .text(Component.translatable("config.rpg_tweaks.button.action"))
+                    .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createQuestRewardsScreen(config)))
+                    .build());
+        }
+
         ConfigCategory.Builder dimCategoryBuilder = ConfigCategory.createBuilder()
                 .name(Component.translatable("config.rpg_tweaks.category.dimensions").withStyle(ChatFormatting.DARK_PURPLE))
-                .tooltip(Component.translatable("config.rpg_tweaks.category.dimensions.tooltip"))
-                .option(ButtonOption.createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.option.manage_quest_rewards").withStyle(ChatFormatting.AQUA, ChatFormatting.BOLD))
-                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.manage_quest_rewards.desc")))
-                        .text(Component.translatable("config.rpg_tweaks.button.action"))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createQuestRewardsScreen(config)))
-                        .build())
+                .tooltip(Component.translatable("config.rpg_tweaks.category.dimensions.tooltip"));
+
+        dimCategoryBuilder
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.option.add_dimension").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.add_dimension.desc")))
@@ -74,7 +166,7 @@ public class ModConfigScreen {
                         .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createAddPlayerExceptionScreen(config)))
                         .build());
 
-        List<OptionGroup> dimGroups = createDimensionGroups(config);
+        List<OptionGroup> dimGroups = createDimensionGroups(config, ftbInstalled);
         if (!dimGroups.isEmpty()) dimCategoryBuilder.groups(dimGroups);
         List<OptionGroup> playerGroups = createPlayerExceptionGroups();
         if (!playerGroups.isEmpty()) dimCategoryBuilder.groups(playerGroups);
@@ -106,25 +198,30 @@ public class ModConfigScreen {
                                         ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
                                         : Component.translatable("config.rpg_tweaks.option.ore_xp_fortune_bonus.value",
                                         String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
-                        .build())
-                .option(Option.<String>createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.option.required_quest_epic").withStyle(ChatFormatting.LIGHT_PURPLE))
-                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.required_quest_epic.desc")))
-                        .binding("", () -> config.requiredQuestEpic, value -> config.requiredQuestEpic = value.trim())
-                        .controller(StringControllerBuilder::create)
-                        .build())
-                .option(Option.<String>createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.option.required_quest_legendary").withStyle(ChatFormatting.GOLD))
-                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.required_quest_legendary.desc")))
-                        .binding("", () -> config.requiredQuestLegendary, value -> config.requiredQuestLegendary = value.trim())
-                        .controller(StringControllerBuilder::create)
-                        .build())
-                .option(ButtonOption.createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.option.add_mob").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
-                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.add_mob.desc")))
-                        .text(Component.translatable("config.rpg_tweaks.button.action"))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createAddMobScreen(config)))
                         .build());
+
+        if (ftbInstalled) {
+            mobLootCategoryBuilder
+                    .option(Option.<String>createBuilder()
+                            .name(Component.translatable("config.rpg_tweaks.option.required_quest_epic").withStyle(ChatFormatting.LIGHT_PURPLE))
+                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.required_quest_epic.desc")))
+                            .binding("", () -> config.requiredQuestEpic, value -> config.requiredQuestEpic = value.trim())
+                            .controller(StringControllerBuilder::create)
+                            .build())
+                    .option(Option.<String>createBuilder()
+                            .name(Component.translatable("config.rpg_tweaks.option.required_quest_legendary").withStyle(ChatFormatting.GOLD))
+                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.required_quest_legendary.desc")))
+                            .binding("", () -> config.requiredQuestLegendary, value -> config.requiredQuestLegendary = value.trim())
+                            .controller(StringControllerBuilder::create)
+                            .build());
+        }
+
+        mobLootCategoryBuilder.option(ButtonOption.createBuilder()
+                .name(Component.translatable("config.rpg_tweaks.option.add_mob").withStyle(ChatFormatting.GREEN, ChatFormatting.BOLD))
+                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.add_mob.desc")))
+                .text(Component.translatable("config.rpg_tweaks.button.action"))
+                .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createAddMobScreen(config)))
+                .build());
 
         List<OptionGroup> mobGroups = createMobLootGroups(config);
         if (!mobGroups.isEmpty()) mobLootCategoryBuilder.groups(mobGroups);
@@ -172,92 +269,7 @@ public class ModConfigScreen {
                         .build())
 
                 .category(oreCategoryBuilder.build())
-
-                .category(ConfigCategory.createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.category.player").withStyle(ChatFormatting.GREEN))
-                        .tooltip(Component.translatable("config.rpg_tweaks.category.player.tooltip"))
-                        .option(Option.<Float>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.exhaustion_rate"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.exhaustion_rate.desc")))
-                                .binding(1.0f, () -> config.exhaustionRateMultiplier, value -> config.exhaustionRateMultiplier = value)
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.0f, 5.0f).step(0.1f)
-                                        .formatValue(v -> Component.translatable("config.rpg_tweaks.value.multiplier", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .option(Option.<Float>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.regen_rate"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.regen_rate.desc")))
-                                .binding(1.0f, () -> config.naturalRegenRateMultiplier, value -> config.naturalRegenRateMultiplier = value)
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0.0f, 5.0f).step(0.1f)
-                                        .formatValue(v -> Component.translatable("config.rpg_tweaks.value.multiplier", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .option(Option.<Float>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.durability"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.durability.desc")))
-                                .binding(0f, () -> config.durabilityMultiplier, value -> config.durabilityMultiplier = value)
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(-1.0f, 5.0f).step(0.1f)
-                                        .formatValue(v -> {
-                                            if (v == -1f) return Component.translatable("config.rpg_tweaks.option.durability.no_loss").withStyle(ChatFormatting.GREEN);
-                                            if (v == 0f) return Component.translatable("config.rpg_tweaks.option.durability.vanilla").withStyle(ChatFormatting.GRAY);
-                                            return Component.translatable("config.rpg_tweaks.value.multiplier", String.format("%.1f", v)).withStyle(ChatFormatting.YELLOW);
-                                        }))
-                                .build())
-                        .option(Option.<Integer>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.max_xp_cap"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.max_xp_cap.desc")))
-                                .binding(0, () -> config.maxStorableXP, value -> config.maxStorableXP = value)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100000).step(100)
-                                        .formatValue(v -> v == 0
-                                                ? Component.translatable("config.rpg_tweaks.option.max_xp_cap.unlimited").withStyle(ChatFormatting.GREEN)
-                                                : Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .option(Option.<Boolean>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.pvp"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.pvp.desc")))
-                                .binding(true, () -> config.pvpEnabled, value -> config.pvpEnabled = value)
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.<Boolean>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.chat_enabled"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.chat_enabled.desc")))
-                                .binding(true, () -> config.chatEnabled, value -> config.chatEnabled = value)
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(ButtonOption.createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.manage_chat_blocked").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.manage_chat_blocked.desc")))
-                                .text(Component.translatable("config.rpg_tweaks.button.action"))
-                                .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(createChatBlockedScreen(config)))
-                                .build())
-                        .option(Option.<Float>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.death_xp_loss"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_xp_loss.desc")))
-                                .binding(0f, () -> config.deathXPLossPercent, value -> config.deathXPLossPercent = value)
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0f, 100f).step(1f)
-                                        .formatValue(v -> v == 0f
-                                                ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
-                                                : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.0f", v)).withStyle(ChatFormatting.RED)))
-                                .build())
-                        .option(Option.<Boolean>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.death_respawn_enabled"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_respawn_enabled.desc")))
-                                .binding(false, () -> config.deathRespawnEnabled, value -> config.deathRespawnEnabled = value)
-                                .controller(TickBoxControllerBuilder::create)
-                                .build())
-                        .option(Option.<Integer>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.death_respawn_min_dist"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_respawn_min_dist.desc")))
-                                .binding(100, () -> config.deathRespawnMinDistance, value -> config.deathRespawnMinDistance = value)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 2000).step(10)
-                                        .formatValue(v -> Component.translatable("config.rpg_tweaks.option.death_respawn_dist.value", v).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .option(Option.<Integer>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.death_respawn_max_dist"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.death_respawn_max_dist.desc")))
-                                .binding(300, () -> config.deathRespawnMaxDistance, value -> config.deathRespawnMaxDistance = value)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 2000).step(10)
-                                        .formatValue(v -> Component.translatable("config.rpg_tweaks.option.death_respawn_dist.value", v).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .build())
+                .category(playerCategoryBuilder.build())
 
                 .category(ConfigCategory.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.category.sleep").withStyle(ChatFormatting.BLUE))
@@ -429,11 +441,13 @@ public class ModConfigScreen {
                 .generateScreen(lastParent);
     }
 
-    private static List<OptionGroup> createDimensionGroups(ModConfig config) {
+    private static List<OptionGroup> createDimensionGroups(ModConfig config, boolean ftbInstalled) {
         List<OptionGroup> groups = new ArrayList<>();
+        if (config.dimensionQuestRequirements == null)
+            config.dimensionQuestRequirements = new java.util.LinkedHashMap<>();
         for (Map.Entry<String, String> entry : new java.util.LinkedHashMap<>(config.blockedDimensions).entrySet()) {
             String dim = entry.getKey();
-            groups.add(OptionGroup.createBuilder()
+            OptionGroup.Builder groupBuilder = OptionGroup.createBuilder()
                     .name(Component.literal("🌍 " + dim).withStyle(ChatFormatting.DARK_PURPLE))
                     .collapsed(false)
                     .option(Option.<String>createBuilder()
@@ -441,27 +455,29 @@ public class ModConfigScreen {
                             .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
                             .binding("", () -> config.blockedDimensions.getOrDefault(dim, ""), value -> config.blockedDimensions.put(dim, value))
                             .controller(StringControllerBuilder::create)
-                            .build())
-                    .option(Option.<String>createBuilder()
-                            .name(Component.translatable("config.rpg_tweaks.option.dimension_quest_req").withStyle(ChatFormatting.YELLOW))
-                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_quest_req.desc")))
-                            .binding("", () -> config.dimensionQuestRequirements.getOrDefault(dim, ""),
-                                    value -> {
-                                        if (value.trim().isEmpty()) config.dimensionQuestRequirements.remove(dim);
-                                        else config.dimensionQuestRequirements.put(dim, value.trim());
-                                    })
-                            .controller(StringControllerBuilder::create)
-                            .build())
-                    .option(ButtonOption.createBuilder()
-                            .name(Component.translatable("config.rpg_tweaks.option.remove_dimension").withStyle(ChatFormatting.RED))
-                            .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.remove_dimension.desc")))
-                            .text(Component.translatable("config.rpg_tweaks.button.action"))
-                            .action((screen, opt) -> {
-                                config.blockedDimensions.remove(dim);
-                                refreshScreen(4);
-                            })
-                            .build())
+                            .build());
+            if (ftbInstalled) {
+                groupBuilder.option(Option.<String>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.dimension_quest_req").withStyle(ChatFormatting.AQUA))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_quest_req.desc")))
+                        .binding("", () -> config.dimensionQuestRequirements.getOrDefault(dim, ""), value -> {
+                            if (value.trim().isEmpty()) config.dimensionQuestRequirements.remove(dim);
+                            else config.dimensionQuestRequirements.put(dim, value.trim());
+                        })
+                        .controller(StringControllerBuilder::create)
+                        .build());
+            }
+            groupBuilder.option(ButtonOption.createBuilder()
+                    .name(Component.translatable("config.rpg_tweaks.option.remove_dimension").withStyle(ChatFormatting.RED))
+                    .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.remove_dimension.desc")))
+                    .text(Component.translatable("config.rpg_tweaks.button.action"))
+                    .action((screen, opt) -> {
+                        config.blockedDimensions.remove(dim);
+                        config.dimensionQuestRequirements.remove(dim);
+                        refreshScreen(4);
+                    })
                     .build());
+            groups.add(groupBuilder.build());
         }
         return groups;
     }
@@ -469,35 +485,56 @@ public class ModConfigScreen {
     private static Screen createAddGlobalDimensionScreen(ModConfig config) {
         final String[] dimensionId = {""};
         final String[] customMsg = {""};
+        final String[] questRewardId = {""};
+        boolean ftbInstalled = FTBQuestsManager.isInstalled();
+
+        ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
+                .option(Option.<String>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.add_dimension.identifier").withStyle(ChatFormatting.YELLOW))
+                        .description(OptionDescription.of(
+                                Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc1"),
+                                Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc2"),
+                                Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc3"),
+                                Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc4")))
+                        .binding("", () -> dimensionId[0], value -> dimensionId[0] = value)
+                        .controller(StringControllerBuilder::create)
+                        .build())
+                .option(Option.<String>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
+                        .binding("", () -> customMsg[0], value -> customMsg[0] = value)
+                        .controller(StringControllerBuilder::create)
+                        .build());
+
+        if (ftbInstalled) {
+            catBuilder.option(Option.<String>createBuilder()
+                    .name(Component.translatable("config.rpg_tweaks.option.dimension_quest_req").withStyle(ChatFormatting.AQUA))
+                    .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_quest_req.desc")))
+                    .binding("", () -> questRewardId[0], value -> questRewardId[0] = value)
+                    .controller(StringControllerBuilder::create)
+                    .build());
+        }
+
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("config.rpg_tweaks.add_dimension.title").withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.BOLD))
                 .save(() -> {
                     String id = dimensionId[0].trim();
                     if (!id.isEmpty() && !config.blockedDimensions.containsKey(id)) {
                         config.blockedDimensions.put(id, customMsg[0].trim());
+                        if (ftbInstalled) {
+                            String rId = questRewardId[0].trim();
+                            if (!rId.isEmpty()) {
+                                if (config.dimensionQuestRequirements == null)
+                                    config.dimensionQuestRequirements = new java.util.LinkedHashMap<>();
+                                config.dimensionQuestRequirements.put(id, rId);
+                            }
+                        }
                         ModConfig.save();
                     }
                     net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(4));
                 })
-                .category(ConfigCategory.createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
-                        .option(Option.<String>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.add_dimension.identifier").withStyle(ChatFormatting.YELLOW))
-                                .description(OptionDescription.of(
-                                        Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc1"),
-                                        Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc2"),
-                                        Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc3"),
-                                        Component.translatable("config.rpg_tweaks.add_dimension.identifier.desc4")))
-                                .binding("", () -> dimensionId[0], value -> dimensionId[0] = value)
-                                .controller(StringControllerBuilder::create)
-                                .build())
-                        .option(Option.<String>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg").withStyle(ChatFormatting.YELLOW))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.dimension_custom_msg.desc")))
-                                .binding("", () -> customMsg[0], value -> customMsg[0] = value)
-                                .controller(StringControllerBuilder::create)
-                                .build())
-                        .build())
+                .category(catBuilder.build())
                 .build()
                 .generateScreen(lastParent);
     }
@@ -863,7 +900,7 @@ public class ModConfigScreen {
                                         Component.translatable("config.rpg_tweaks.mob_loot.moon_phases.desc1"),
                                         Component.translatable("config.rpg_tweaks.mob_loot.moon_phases.desc2").withStyle(ChatFormatting.GRAY)))
                                 .binding("",
-                                        () -> tier.moonPhases.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(",")),
+                                        () -> tier.moonPhases.stream().map(String::valueOf).collect(Collectors.joining(",")),
                                         value -> {
                                             tier.moonPhases = new ArrayList<>();
                                             for (String s : value.split(",")) {

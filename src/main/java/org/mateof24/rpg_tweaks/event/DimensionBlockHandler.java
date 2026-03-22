@@ -59,15 +59,13 @@ public class DimensionBlockHandler {
         if (PlayerDimensionData.isAllowed(player.getUUID(), dimension)) return false;
         if (PlayerDimensionData.isBlocked(player.getUUID(), dimension)) return true;
         if (!ModConfig.getInstance().blockedDimensions.containsKey(dimension)) return false;
-
-        Map<String, String> questReqs = ModConfig.getInstance().dimensionQuestRequirements;
-        if (questReqs != null && questReqs.containsKey(dimension)) {
-            String questId = questReqs.get(dimension);
-            if (questId != null && !questId.isBlank()) {
-                if (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasCompletedQuest(player, questId)) {
+        Map<String, String> dimRewards = ModConfig.getInstance().dimensionQuestRequirements;
+        if (dimRewards != null) {
+            String rewardId = dimRewards.get(dimension);
+            if (rewardId != null && !rewardId.isBlank()) {
+                if (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasClaimedReward(player, rewardId)) {
                     return false;
                 }
-                return true;
             }
         }
         return true;

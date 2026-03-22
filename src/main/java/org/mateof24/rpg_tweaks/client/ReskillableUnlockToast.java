@@ -44,7 +44,26 @@ public class ReskillableUnlockToast implements Toast {
     private ReskillableUnlockToast(ItemStack stack, String skill, int level) {
         this.itemStack = stack;
         this.itemName = stack.getHoverName().copy().withStyle(ChatFormatting.WHITE);
-        String skillLabel = skill.substring(0, 1).toUpperCase(Locale.ROOT) + skill.substring(1);
+        String skillLabel = skill.substring(0, 1).toUpperCase(java.util.Locale.ROOT) + skill.substring(1);
+        try {
+            java.nio.file.Path customPath = net.neoforged.fml.loading.FMLPaths.CONFIGDIR.get()
+                    .resolve("reskillable/custom_skills.json");
+            if (java.nio.file.Files.exists(customPath)) {
+                String raw = java.nio.file.Files.readString(customPath);
+                com.google.gson.JsonObject root = com.google.gson.JsonParser.parseString(raw).getAsJsonObject();
+                if (root.has("customSkills")) {
+                    for (com.google.gson.JsonElement el : root.getAsJsonArray("customSkills")) {
+                        if (!el.isJsonObject()) continue;
+                        com.google.gson.JsonObject obj = el.getAsJsonObject();
+                        if (obj.has("id") && obj.get("id").getAsString().equalsIgnoreCase(skill)
+                                && obj.has("displayName")) {
+                            skillLabel = obj.get("displayName").getAsString();
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
         this.subtitle = Component.literal(skillLabel + " Lv." + level).withStyle(ChatFormatting.GRAY);
         this.accentColor = SKILL_COLORS.getOrDefault(skill, 0xFFFFD700);
     }

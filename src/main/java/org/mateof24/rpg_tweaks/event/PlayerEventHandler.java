@@ -25,6 +25,7 @@ public class PlayerEventHandler {
             DimensionBlockHandler.clearPlayer(player);
             org.mateof24.rpg_tweaks.integration.ReskillablePlayerTracker.clearPlayer(player.getUUID());
             DeathRespawnHandler.clearPlayer(player.getUUID());
+            org.mateof24.rpg_tweaks.integration.FTBQuestsPlayerTracker.clearPlayer(player.getUUID());
         }
     }
 }

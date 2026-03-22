@@ -285,7 +285,6 @@
   "config.rpg_tweaks.option.required_quest_legendary": "Quest Requerida para Sacos Legendarios",
   "config.rpg_tweaks.option.required_quest_legendary.desc": "ID de quest que debe completarse antes de que los sacos Legendarios puedan dropearse globalmente. Vacío = desactivado. Requiere FTB Quests.",
   "config.rpg_tweaks.option.dimension_quest_req": "Quest Requerida para Entrar",
-  "config.rpg_tweaks.option.dimension_quest_req.desc": "ID de quest que debe completarse para desbloquear el acceso a esta dimensión. Vacío = usar solo el bloqueo global. Requiere FTB Quests.",
   "config.rpg_tweaks.option.manage_quest_rewards": "📋 Gestionar Recompensas de Quest",
   "config.rpg_tweaks.option.manage_quest_rewards.desc": "Configura niveles de habilidad otorgados al completar quests específicas. Requiere FTB Quests + Reskillable Reimagined.",
   "config.rpg_tweaks.quest_rewards.title": "Recompensas de Habilidad por Quest",
@@ -295,5 +294,9 @@
   "config.rpg_tweaks.quest_rewards.quest_id": "ID de Quest",
   "config.rpg_tweaks.quest_rewards.quest_id.desc": "El ID de quest de FTB Quests a escuchar.",
   "config.rpg_tweaks.quest_rewards.skills": "Recompensas de Habilidad",
-  "config.rpg_tweaks.quest_rewards.skills.desc": "Lista separada por comas de pares habilidad:nivel. Ejemplo: attack:10,mining:5"
+  "config.rpg_tweaks.quest_rewards.skills.desc": "Lista separada por comas de pares habilidad:nivel. Ejemplo: attack:10,mining:5",
+  "config.rpg_tweaks.quest_rewards.reward_id": "ID de Recompensa",
+  "config.rpg_tweaks.quest_rewards.reward_id.desc": "El ID de recompensa de FTB Quests (valor hex visible en el editor de quests). Al reclamar esta recompensa, se otorgan las habilidades configuradas.",
+  "config.rpg_tweaks.option.dimension_quest_req.desc": "ID de recompensa que, al reclamarse, otorga al jugador acceso personal a esta dimensión. Vacío = desactivado. Requiere FTB Quests.",
+  "rpg_tweaks.reskillable.error.entity_required": "§cDebes especificar un ID de entidad en el comando."
 }

@@ -77,6 +77,7 @@ public class RPG_Tweaks {
             LOGGER.info("Reskillable Reimagined detected - Skill lock commands available");
             LOGGER.info("Use /rpg_tweaks skills add <skill> <level> ... <item>");
             LOGGER.info("Use /rpg_tweaks craftskills add <skill> <level> ... <item>");
+            LOGGER.info("Use /rpg_tweaks attackskills add <skill> <level> ... <entity>");
             LOGGER.info("=============================================");
             org.mateof24.rpg_tweaks.integration.ReskillableSkillCache.load();
         } else {

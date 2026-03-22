@@ -71,10 +71,14 @@ public class MobLootHandler {
 
         String reqEpic = config.requiredQuestEpic;
         String reqLeg = config.requiredQuestLegendary;
+
+        boolean ftbInstalled = FTBQuestsManager.isInstalled();
+
         boolean epicUnlocked = reqEpic == null || reqEpic.isBlank()
-                || (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasCompletedQuest(player, reqEpic));
+                || (ftbInstalled && FTBQuestsManager.hasCompletedQuest(player, reqEpic));
+
         boolean legUnlocked = reqLeg == null || reqLeg.isBlank()
-                || (FTBQuestsManager.isInstalled() && FTBQuestsManager.hasCompletedQuest(player, reqLeg));
+                || (ftbInstalled && FTBQuestsManager.hasCompletedQuest(player, reqLeg));
 
         ItemStack winner = null;
         if (legUnlocked) winner = rollTier(entity, player, dropConfig.legendary, sackBonus, ModItems.LOOT_SACK_LEGENDARY.get());
@@ -90,8 +94,7 @@ public class MobLootHandler {
             drop.setPickUpDelay(10);
             event.getDrops().add(drop);
             if (isHighTier) {
-                entity.level().playSound(null, entity.blockPosition(),
-                        SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.5f, 1.0f);
+                entity.playSound(SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, 0.5f, 1.0f);
             }
         }
 
@@ -120,7 +123,10 @@ public class MobLootHandler {
                     .unwrapKey().map(k -> k.location().toString()).orElse("");
             if (!biome.equals(tier.requiredBiome)) return false;
         }
-        if (tier.onlyAtNight && entity.level().isDay()) return false;
+        if (tier.onlyAtNight) {
+            long time = entity.level().getDayTime() % 24000L;
+            if (time < 12000L) return false;
+        }
         if (!tier.moonPhases.isEmpty() && entity.level() instanceof ServerLevel sl) {
             int phase = (int) ((sl.getDayTime() / 24000L) % 8);
             if (!tier.moonPhases.contains(phase)) return false;

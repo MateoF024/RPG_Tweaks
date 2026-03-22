@@ -1,10 +1,6 @@
 package org.mateof24.rpg_tweaks.integration;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.mojang.logging.LogUtils;
 import net.neoforged.fml.loading.FMLPaths;
 import org.slf4j.Logger;
@@ -212,5 +208,37 @@ public class ReskillableConfigManager {
 
         String[] parts = itemId.split(":");
         return parts.length == 2 && !parts[0].isEmpty() && !parts[1].isEmpty();
+    }
+
+    private static final Path CUSTOM_SKILLS_PATH = RESKILLABLE_CONFIG_DIR.resolve("custom_skills.json");
+
+    public static List<String> getCustomSkillIds() {
+        if (!Files.exists(CUSTOM_SKILLS_PATH)) return List.of();
+        try {
+            String raw = Files.readString(CUSTOM_SKILLS_PATH);
+            JsonObject root = JsonParser.parseString(raw).getAsJsonObject();
+            if (!root.has("customSkills")) return List.of();
+            List<String> ids = new ArrayList<>();
+            for (JsonElement el : root.getAsJsonArray("customSkills")) {
+                if (!el.isJsonObject()) continue;
+                JsonObject obj = el.getAsJsonObject();
+                if (!obj.has("id")) continue;
+                String id = obj.get("id").getAsString().trim().toLowerCase(java.util.Locale.ROOT);
+                if (!id.isEmpty()) ids.add(id);
+            }
+            return ids;
+        } catch (Exception e) {
+            LOGGER.warn("[RPGTweaks/Reskillable] Failed to read custom_skills.json: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
+    public static List<String> getAllValidSkillIds() {
+        List<String> ids = new ArrayList<>(List.of(
+                "attack", "defense", "mining", "gathering",
+                "farming", "building", "agility", "magic"
+        ));
+        ids.addAll(getCustomSkillIds());
+        return ids;
     }
 }

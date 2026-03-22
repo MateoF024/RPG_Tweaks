@@ -28,6 +28,7 @@ public class ReskillablePlayerTracker {
     private static volatile Method getLevelMethod = null;
     private static volatile Object[] skillEnumConstants = null;
     private static volatile String[] skillNames = null;
+    private static volatile Method getLevelByIdMethod = null;
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -77,6 +78,32 @@ public class ReskillablePlayerTracker {
                     cached.put(skillName, current);
                 }
             }
+            if (getLevelByIdMethod != null) {
+                List<String> customIds = ReskillableConfigManager.getCustomSkillIds();
+                for (String customId : customIds) {
+                    try {
+                        int current = (int) getLevelByIdMethod.invoke(model, customId);
+                        int previous = cached.getOrDefault(customId, -1);
+                        if (previous < 0) {
+                            cached.put(customId, current);
+                            continue;
+                        }
+                        if (current > previous) {
+                            LOGGER.info("[RPGTweaks/Tracker] {} leveled {} {} → {}",
+                                    player.getName().getString(), customId, previous, current);
+                            for (int lvl = previous + 1; lvl <= current; lvl++) {
+                                List<String> unlocked = ReskillableSkillCache.getUnlockedItems(customId, lvl);
+                                if (!unlocked.isEmpty()) {
+                                    S2CUnlockNotificationPacket.send(player, customId, lvl, unlocked);
+                                }
+                            }
+                            cached.put(customId, current);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.warn("[RPGTweaks/Tracker] Custom skill tick error {}: {}", customId, e.getMessage());
+                    }
+                }
+            }
         } catch (Exception e) {
             LOGGER.warn("[RPGTweaks/Tracker] Tick error: {}", e.getMessage());
         }
@@ -112,6 +139,14 @@ public class ReskillablePlayerTracker {
 
             getModelMethod    = gm;
             getLevelMethod    = gl;
+            for (Method m : skillModelClass.getMethods()) {
+                if (m.getName().equals("getSkillLevel") && m.getParameterCount() == 1
+                        && m.getParameterTypes()[0] == String.class
+                        && m.getReturnType() == int.class) {
+                    getLevelByIdMethod = m;
+                    break;
+                }
+            }
             skillEnumConstants = constants;
             skillNames         = names;
 
