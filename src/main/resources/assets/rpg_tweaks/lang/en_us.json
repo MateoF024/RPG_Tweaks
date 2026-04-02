@@ -298,5 +298,20 @@
   "config.rpg_tweaks.quest_rewards.reward_id": "Reward ID",
   "config.rpg_tweaks.quest_rewards.reward_id.desc": "The FTB Quests reward ID (hex value shown in the quest editor). When this reward is claimed, the skills below are granted.",
   "config.rpg_tweaks.option.dimension_quest_req.desc": "Reward ID that, when claimed, grants this player personal access to this dimension. Leave empty to disable. Requires FTB Quests.",
-  "rpg_tweaks.reskillable.error.entity_required": "§cYou must specify an entity ID in the command."
+  "rpg_tweaks.reskillable.error.entity_required": "§cYou must specify an entity ID in the command.",
+  "config.rpg_tweaks.mob_loot.xp_on_kill": "Kill XP",
+  "config.rpg_tweaks.mob_loot.xp_on_kill.desc": "Click to configure the XP range awarded when killing this mob.",
+  "config.rpg_tweaks.option.manage_sleep_quests": "📋 Manage Sleep Quest Requirements",
+  "config.rpg_tweaks.option.manage_sleep_quests.desc": "Block specific players from sleeping until they claim a quest reward. Requires FTB Quests.",
+  "rpg_tweaks.sleep.quest_required": "§c§lYou must claim a required quest reward before sleeping.",
+  "config.rpg_tweaks.option.sleep_quest_reward": "Sleep Quest Reward Requirement",
+  "config.rpg_tweaks.option.sleep_quest_reward.desc": "Reward ID that players must claim before being allowed to sleep. Leave empty to disable. Requires FTB Quests.",
+  "gui.rpg_tweaks.progression.title": "✦ Skill Locks ✦",
+  "gui.rpg_tweaks.progression.skills": "Skills",
+  "gui.rpg_tweaks.progression.prev": "◀ Prev",
+  "gui.rpg_tweaks.progression.next": "Next ▶",
+  "gui.rpg_tweaks.progression.empty": "No items configured.",
+  "gui.rpg_tweaks.progression.no_data": "No skill data found.",
+  "key.rpg_tweaks.open_progression": "Open Skills Book",
+  "key.categories.rpg_tweaks": "RPG Tweaks"
 }

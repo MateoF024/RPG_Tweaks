@@ -126,10 +126,12 @@ public class RPGCommands {
     private static int resetOreEntry(CommandContext<CommandSourceStack> context) {
         String entry = StringArgumentType.getString(context, "entry");
         ModConfig config = ModConfig.getInstance();
+        java.util.Map<String, XPValues> defaults = getVanillaOreDefaults();
+        XPValues resetValue = defaults.getOrDefault(entry, new XPValues(0, 0));
         if (config.oreXPConfig.blockConfigs.containsKey(entry)) {
-            config.oreXPConfig.blockConfigs.put(entry, new XPValues(0, 0));
+            config.oreXPConfig.blockConfigs.put(entry, resetValue);
         } else if (config.oreXPConfig.tagConfigs.containsKey(entry)) {
-            config.oreXPConfig.tagConfigs.put(entry, new XPValues(0, 0));
+            config.oreXPConfig.tagConfigs.put(entry, resetValue);
         } else {
             context.getSource().sendFailure(Component.translatable("rpg_tweaks.command.reset.entry_not_found", entry));
             return 0;
@@ -204,21 +206,34 @@ public class RPGCommands {
         config.challengeXPReward = 0;
     }
 
+    private static java.util.Map<String, XPValues> getVanillaOreDefaults() {
+        java.util.Map<String, XPValues> d = new java.util.LinkedHashMap<>();
+        d.put("minecraft:coal_ores",      new XPValues(0, 4));
+        d.put("minecraft:copper_ores",    new XPValues(1, 4));
+        d.put("minecraft:iron_ores",      new XPValues(2, 5));
+        d.put("minecraft:gold_ores",      new XPValues(3, 5));
+        d.put("minecraft:redstone_ores",  new XPValues(5, 7));
+        d.put("minecraft:lapis_ores",     new XPValues(5, 8));
+        d.put("minecraft:diamond_ores",   new XPValues(5, 10));
+        d.put("minecraft:emerald_ores",   new XPValues(7, 12));
+        d.put("minecraft:nether_quartz_ore", new XPValues(8, 16));
+        return d;
+    }
+
     private static void applyOreXPDefaults(ModConfig config) {
         config.enableCustomOreXP = true;
         config.oreXPFortuneBonus = 0.0f;
         config.logOreXP = false;
         config.oreXPConfig = new OreXPConfig();
-        ModConfig config2 = config;
-        config2.oreXPConfig.tagConfigs.put("minecraft:coal_ores", new XPValues(1, 3));
-        config2.oreXPConfig.tagConfigs.put("minecraft:copper_ores", new XPValues(1, 3));
-        config2.oreXPConfig.tagConfigs.put("minecraft:iron_ores", new XPValues(2, 4));
-        config2.oreXPConfig.tagConfigs.put("minecraft:gold_ores", new XPValues(2, 5));
-        config2.oreXPConfig.tagConfigs.put("minecraft:redstone_ores", new XPValues(3, 7));
-        config2.oreXPConfig.tagConfigs.put("minecraft:lapis_ores", new XPValues(4, 8));
-        config2.oreXPConfig.tagConfigs.put("minecraft:diamond_ores", new XPValues(5, 12));
-        config2.oreXPConfig.tagConfigs.put("minecraft:emerald_ores", new XPValues(5, 12));
-        config2.oreXPConfig.blockConfigs.put("minecraft:nether_quartz_ore", new XPValues(7, 15));
+        java.util.Map<String, XPValues> defaults = getVanillaOreDefaults();
+        for (java.util.Map.Entry<String, XPValues> e : defaults.entrySet()) {
+            String key = e.getKey();
+            if (key.equals("minecraft:nether_quartz_ore")) {
+                config.oreXPConfig.blockConfigs.put(key, e.getValue());
+            } else {
+                config.oreXPConfig.tagConfigs.put(key, e.getValue());
+            }
+        }
     }
 
     private static void applyPlayerDefaults(ModConfig config) {
@@ -231,8 +246,8 @@ public class RPGCommands {
         config.chatBlockedPlayers = new java.util.ArrayList<>();
         config.deathXPLossPercent = 0f;
         config.deathRespawnEnabled = false;
-        config.deathRespawnMinDistance = 100;
-        config.deathRespawnMaxDistance = 300;
+        config.deathRespawnMinDistance = 128;
+        config.deathRespawnMaxDistance = 320;
     }
 
     private static void applySleepDefaults(ModConfig config) {
@@ -240,6 +255,7 @@ public class RPGCommands {
         config.sleepHealPercent = 0f;
         config.sleepHungerPoints = 0;
         config.sleepHungerChance = 0f;
+        config.sleepQuestRewardId = "";
     }
 
     private static void applyDimensionsDefaults(ModConfig config) {

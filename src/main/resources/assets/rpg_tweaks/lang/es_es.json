@@ -298,5 +298,20 @@
   "config.rpg_tweaks.quest_rewards.reward_id": "ID de Recompensa",
   "config.rpg_tweaks.quest_rewards.reward_id.desc": "El ID de recompensa de FTB Quests (valor hex visible en el editor de quests). Al reclamar esta recompensa, se otorgan las habilidades configuradas.",
   "config.rpg_tweaks.option.dimension_quest_req.desc": "ID de recompensa que, al reclamarse, otorga al jugador acceso personal a esta dimensión. Vacío = desactivado. Requiere FTB Quests.",
-  "rpg_tweaks.reskillable.error.entity_required": "§cDebes especificar un ID de entidad en el comando."
+  "rpg_tweaks.reskillable.error.entity_required": "§cDebes especificar un ID de entidad en el comando.",
+  "config.rpg_tweaks.mob_loot.xp_on_kill": "XP al Matar",
+  "config.rpg_tweaks.mob_loot.xp_on_kill.desc": "Haz clic para configurar el rango de XP otorgado al matar este mob.",
+  "config.rpg_tweaks.option.manage_sleep_quests": "📋 Gestionar Requisitos de Quest para Dormir",
+  "config.rpg_tweaks.option.manage_sleep_quests.desc": "Bloquea a jugadores específicos de dormir hasta que reclamen una recompensa de quest. Requiere FTB Quests.",
+  "rpg_tweaks.sleep.quest_required": "§c§lDebes reclamar una recompensa de quest requerida antes de dormir.",
+  "config.rpg_tweaks.option.sleep_quest_reward": "Requisito de Quest para Dormir",
+  "config.rpg_tweaks.option.sleep_quest_reward.desc": "ID de recompensa que los jugadores deben reclamar antes de poder dormir. Vacío = desactivado. Requiere FTB Quests.",
+  "gui.rpg_tweaks.progression.title": "✦ Libro de Progresión",
+  "gui.rpg_tweaks.progression.skills": "Habilidades",
+  "gui.rpg_tweaks.progression.prev": "◀ Anterior",
+  "gui.rpg_tweaks.progression.next": "Siguiente ▶",
+  "gui.rpg_tweaks.progression.empty": "No hay ítems configurados.",
+  "gui.rpg_tweaks.progression.no_data": "No se encontraron datos.",
+  "key.rpg_tweaks.open_progression": "Abrir Libro de Progresión",
+  "key.categories.rpg_tweaks": "RPG Tweaks"
 }

@@ -1,6 +1,7 @@
 package org.mateof24.rpg_tweaks;
 
 import com.mojang.logging.LogUtils;
+import net.minecraft.client.Minecraft;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -146,5 +147,26 @@ public class RPG_Tweaks {
         public static void onClientSetup(FMLClientSetupEvent event) {
             LOGGER.info("RPG Tweaks - Client initialized");
         }
+
+        @SubscribeEvent
+        public static void onRegisterKeyMappings(net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent event) {
+            if (org.mateof24.rpg_tweaks.integration.ReskillableConfigManager.isReskillableInstalled()) {
+                event.register(org.mateof24.rpg_tweaks.client.ModKeybindings.OPEN_PROGRESSION);
+            }
+        }
     }
+
+    @EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    public static class ClientGameEvents {
+        @SubscribeEvent
+        public static void onKeyInput(net.neoforged.neoforge.client.event.InputEvent.Key event) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.screen == null
+                    && org.mateof24.rpg_tweaks.client.ModKeybindings.OPEN_PROGRESSION.consumeClick()
+                    && org.mateof24.rpg_tweaks.integration.ReskillableConfigManager.isReskillableInstalled()) {
+                mc.setScreen(new org.mateof24.rpg_tweaks.client.ReskillableProgressionScreen());
+            }
+        }
+    }
+
 }

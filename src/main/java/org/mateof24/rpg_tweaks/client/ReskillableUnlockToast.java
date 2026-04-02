@@ -25,7 +25,7 @@ public class ReskillableUnlockToast implements Toast {
     private static final int WIDTH = 160;
     private static final int HEIGHT = 32;
 
-    private static final Map<String, Integer> SKILL_COLORS = Map.of(
+    public static final Map<String, Integer> SKILL_COLORS = Map.of(
             "attack",    0xFFFF5555,
             "defense",   0xFF5555FF,
             "mining",    0xFFAAAAAA,

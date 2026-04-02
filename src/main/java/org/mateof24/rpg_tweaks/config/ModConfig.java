@@ -50,6 +50,7 @@ public class ModConfig {
     public float sleepHealPercent = 0f;
     public int sleepHungerPoints = 0;
     public float sleepHungerChance = 0f;
+    public String sleepQuestRewardId = "";
 
     // Chat System
     public boolean chatEnabled = true;
@@ -88,19 +89,16 @@ public class ModConfig {
         if (oreXPConfig == null) {
             oreXPConfig = new OreXPConfig();
         }
-
         if (oreXPConfig.blockConfigs.isEmpty() && oreXPConfig.tagConfigs.isEmpty()) {
-            oreXPConfig.tagConfigs.put("minecraft:coal_ores", new XPValues(0, 4));
-            oreXPConfig.tagConfigs.put("minecraft:copper_ores", new XPValues(1, 4));
-            oreXPConfig.tagConfigs.put("minecraft:iron_ores", new XPValues(2, 5));
-            oreXPConfig.tagConfigs.put("minecraft:gold_ores", new XPValues(3, 5));
+            oreXPConfig.tagConfigs.put("minecraft:coal_ores",     new XPValues(0, 4));
+            oreXPConfig.tagConfigs.put("minecraft:copper_ores",   new XPValues(1, 4));
+            oreXPConfig.tagConfigs.put("minecraft:iron_ores",     new XPValues(2, 5));
+            oreXPConfig.tagConfigs.put("minecraft:gold_ores",     new XPValues(3, 5));
             oreXPConfig.tagConfigs.put("minecraft:redstone_ores", new XPValues(5, 7));
-            oreXPConfig.tagConfigs.put("minecraft:lapis_ores", new XPValues(5, 8));
-            oreXPConfig.tagConfigs.put("minecraft:diamond_ores", new XPValues(5, 10));
-            oreXPConfig.tagConfigs.put("minecraft:emerald_ores", new XPValues(7, 12));
+            oreXPConfig.tagConfigs.put("minecraft:lapis_ores",    new XPValues(5, 8));
+            oreXPConfig.tagConfigs.put("minecraft:diamond_ores",  new XPValues(5, 10));
+            oreXPConfig.tagConfigs.put("minecraft:emerald_ores",  new XPValues(7, 12));
             oreXPConfig.blockConfigs.put("minecraft:nether_quartz_ore", new XPValues(8, 16));
-
-            LOGGER.info("Default mineral configuration initialized with tags");
         }
     }
 
@@ -122,6 +120,7 @@ public class ModConfig {
                 if (INSTANCE.requiredQuestEpic == null) INSTANCE.requiredQuestEpic = "";
                 if (INSTANCE.requiredQuestLegendary == null) INSTANCE.requiredQuestLegendary = "";
                 if (INSTANCE.questSkillRewards == null) INSTANCE.questSkillRewards = new LinkedHashMap<>();
+                if (INSTANCE.sleepQuestRewardId == null) INSTANCE.sleepQuestRewardId = "";
             } catch (Exception e) {
                 LOGGER.error("Error loading configuration, using default values.", e);
                 INSTANCE = new ModConfig();

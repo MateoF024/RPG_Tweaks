@@ -20,14 +20,29 @@ public class SleepMixin {
 
     @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
     private void checkSleepAllowed(BlockPos pos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
-        int requiredNight = ModConfig.getInstance().sleepFromNight;
-        if (requiredNight <= 0) return;
-
         Player player = (Player)(Object)this;
         if (player.level().isClientSide()) return;
 
-        long currentDay = player.level().getDayTime() / 24000L;
+        if (player instanceof ServerPlayer serverPlayer) {
+            String rewardId = ModConfig.getInstance().sleepQuestRewardId;
+            if (rewardId != null && !rewardId.isBlank()) {
+                boolean claimed = org.mateof24.rpg_tweaks.integration.FTBQuestsManager.isInstalled()
+                        && org.mateof24.rpg_tweaks.integration.FTBQuestsManager.hasClaimedReward(serverPlayer, rewardId);
+                if (!claimed) {
+                    cir.setReturnValue(Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_HERE));
+                    serverPlayer.displayClientMessage(
+                            Component.translatable("rpg_tweaks.sleep.quest_required"),
+                            true
+                    );
+                    return;
+                }
+            }
+        }
 
+        int requiredNight = ModConfig.getInstance().sleepFromNight;
+        if (requiredNight <= 0) return;
+
+        long currentDay = player.level().getDayTime() / 24000L;
         if (currentDay < requiredNight) {
             cir.setReturnValue(Either.left(Player.BedSleepingProblem.NOT_POSSIBLE_HERE));
             if (player instanceof ServerPlayer serverPlayer) {

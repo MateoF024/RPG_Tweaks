@@ -226,6 +226,56 @@ public class ModConfigScreen {
         List<OptionGroup> mobGroups = createMobLootGroups(config);
         if (!mobGroups.isEmpty()) mobLootCategoryBuilder.groups(mobGroups);
 
+
+        ConfigCategory.Builder sleepCategoryBuilder = ConfigCategory.createBuilder()
+                .name(Component.translatable("config.rpg_tweaks.category.sleep").withStyle(ChatFormatting.BLUE))
+                .tooltip(Component.translatable("config.rpg_tweaks.category.sleep.tooltip"))
+                .option(Option.<Integer>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.sleep_from_night"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_from_night.desc")))
+                        .binding(0, () -> config.sleepFromNight, value -> config.sleepFromNight = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1)
+                                .formatValue(v -> v == 0
+                                        ? Component.translatable("config.rpg_tweaks.option.sleep_from_night.always").withStyle(ChatFormatting.GREEN)
+                                        : Component.translatable("config.rpg_tweaks.option.sleep_from_night.night", v).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.sleep_heal"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_heal.desc")))
+                        .binding(0f, () -> config.sleepHealPercent, value -> config.sleepHealPercent = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0f, 100f).step(1f)
+                                .formatValue(v -> v == 0f
+                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                        : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.0f", v)).withStyle(ChatFormatting.GREEN)))
+                        .build())
+                .option(Option.<Integer>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.sleep_hunger"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_hunger.desc")))
+                        .binding(0, () -> config.sleepHungerPoints, value -> config.sleepHungerPoints = value)
+                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 20).step(1)
+                                .formatValue(v -> v == 0
+                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                        : Component.translatable("config.rpg_tweaks.value.points", v).withStyle(ChatFormatting.YELLOW)))
+                        .build())
+                .option(Option.<Float>createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.option.sleep_hunger_chance"))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_hunger_chance.desc")))
+                        .binding(0f, () -> config.sleepHungerChance, value -> config.sleepHungerChance = value)
+                        .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0f, 100f).step(1f)
+                                .formatValue(v -> v == 0f
+                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                        : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.0f", v)).withStyle(ChatFormatting.GREEN)))
+                        .build());
+
+        if (ftbInstalled) {
+            sleepCategoryBuilder.option(Option.<String>createBuilder()
+                    .name(Component.translatable("config.rpg_tweaks.option.sleep_quest_reward").withStyle(ChatFormatting.AQUA))
+                    .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_quest_reward.desc")))
+                    .binding("", () -> config.sleepQuestRewardId, value -> config.sleepQuestRewardId = value.trim())
+                    .controller(StringControllerBuilder::create)
+                    .build());
+        }
+
         return YetAnotherConfigLib.createBuilder()
                 .title(Component.translatable("config.rpg_tweaks.title").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
                 .save(ModConfig::save)
@@ -270,48 +320,7 @@ public class ModConfigScreen {
 
                 .category(oreCategoryBuilder.build())
                 .category(playerCategoryBuilder.build())
-
-                .category(ConfigCategory.createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.category.sleep").withStyle(ChatFormatting.BLUE))
-                        .tooltip(Component.translatable("config.rpg_tweaks.category.sleep.tooltip"))
-                        .option(Option.<Integer>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.sleep_from_night"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_from_night.desc")))
-                                .binding(0, () -> config.sleepFromNight, value -> config.sleepFromNight = value)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 100).step(1)
-                                        .formatValue(v -> v == 0
-                                                ? Component.translatable("config.rpg_tweaks.option.sleep_from_night.always").withStyle(ChatFormatting.GREEN)
-                                                : Component.translatable("config.rpg_tweaks.option.sleep_from_night.night", v).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .option(Option.<Float>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.sleep_heal"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_heal.desc")))
-                                .binding(0f, () -> config.sleepHealPercent, value -> config.sleepHealPercent = value)
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0f, 100f).step(1f)
-                                        .formatValue(v -> v == 0f
-                                                ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
-                                                : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.0f", v)).withStyle(ChatFormatting.GREEN)))
-                                .build())
-                        .option(Option.<Integer>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.sleep_hunger"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_hunger.desc")))
-                                .binding(0, () -> config.sleepHungerPoints, value -> config.sleepHungerPoints = value)
-                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 20).step(1)
-                                        .formatValue(v -> v == 0
-                                                ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
-                                                : Component.translatable("config.rpg_tweaks.value.points", v).withStyle(ChatFormatting.YELLOW)))
-                                .build())
-                        .option(Option.<Float>createBuilder()
-                                .name(Component.translatable("config.rpg_tweaks.option.sleep_hunger_chance"))
-                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.option.sleep_hunger_chance.desc")))
-                                .binding(0f, () -> config.sleepHungerChance, value -> config.sleepHungerChance = value)
-                                .controller(opt -> FloatSliderControllerBuilder.create(opt).range(0f, 100f).step(1f)
-                                        .formatValue(v -> v == 0f
-                                                ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
-                                                : Component.translatable("config.rpg_tweaks.value.percent", String.format("%.0f", v)).withStyle(ChatFormatting.GREEN)))
-                                .build())
-                        .build())
-
+                .category(sleepCategoryBuilder.build())
                 .category(dimCategoryBuilder.build())
                 .category(mobLootCategoryBuilder.build())
 
@@ -772,64 +781,69 @@ public class ModConfigScreen {
     private static OptionGroup createMobLootGroup(String mobId, MobLootConfig.MobSackDrops drops, ModConfig config) {
         drops.ensureDefaults();
         return OptionGroup.createBuilder()
-                .name(Component.literal(mobId).withStyle(ChatFormatting.DARK_RED))
+                .name(Component.literal(mobId).withStyle(ChatFormatting.GREEN))
                 .collapsed(true)
-                .option(Option.<Integer>createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.mob_loot.xp_min").withStyle(ChatFormatting.YELLOW))
-                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.xp_min.desc")))
-                        .binding(drops.xpOnKill.minXP != null ? drops.xpOnKill.minXP : 0,
-                                () -> drops.xpOnKill.minXP != null ? drops.xpOnKill.minXP : 0,
-                                value -> drops.xpOnKill.minXP = value)
-                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 500).step(1)
-                                .formatValue(v -> v == 0
-                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
-                                        : Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
-                        .build())
-                .option(Option.<Integer>createBuilder()
-                        .name(Component.translatable("config.rpg_tweaks.mob_loot.xp_max").withStyle(ChatFormatting.YELLOW))
-                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.xp_max.desc")))
-                        .binding(drops.xpOnKill.maxXP != null ? drops.xpOnKill.maxXP : 0,
-                                () -> drops.xpOnKill.maxXP != null ? drops.xpOnKill.maxXP : 0,
-                                value -> drops.xpOnKill.maxXP = value)
-                        .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 500).step(1)
-                                .formatValue(v -> v == 0
-                                        ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
-                                        : Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
+                .option(ButtonOption.createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.mob_loot.xp_on_kill").withStyle(ChatFormatting.YELLOW))
+                        .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.xp_on_kill.desc")))
+                        .text(Component.literal(drops.xpOnKill != null && drops.xpOnKill.shouldDropXP()
+                                ? drops.xpOnKill.minXP + "-" + drops.xpOnKill.maxXP + " XP"
+                                : "✗").withStyle(ChatFormatting.YELLOW))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(
+                                    createKillXPScreen(config, mobId, drops));
+                        })
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.mob_loot.tier.common").withStyle(ChatFormatting.GRAY))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.tier.open_desc")))
                         .text(Component.literal(formatTierButton(drops.common.chance)).withStyle(ChatFormatting.WHITE))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(
-                                createSackTierScreen(config, mobId, drops.common, "config.rpg_tweaks.mob_loot.tier.common", ChatFormatting.GRAY)))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(
+                                    createSackTierScreen(config, mobId, drops.common, "config.rpg_tweaks.mob_loot.tier.common", ChatFormatting.GRAY));
+                        })
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.mob_loot.tier.uncommon").withStyle(ChatFormatting.GREEN))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.tier.open_desc")))
                         .text(Component.literal(formatTierButton(drops.uncommon.chance)).withStyle(ChatFormatting.GREEN))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(
-                                createSackTierScreen(config, mobId, drops.uncommon, "config.rpg_tweaks.mob_loot.tier.uncommon", ChatFormatting.GREEN)))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(
+                                    createSackTierScreen(config, mobId, drops.uncommon, "config.rpg_tweaks.mob_loot.tier.uncommon", ChatFormatting.GREEN));
+                        })
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.mob_loot.tier.rare").withStyle(ChatFormatting.AQUA))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.tier.open_desc")))
                         .text(Component.literal(formatTierButton(drops.rare.chance)).withStyle(ChatFormatting.AQUA))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(
-                                createSackTierScreen(config, mobId, drops.rare, "config.rpg_tweaks.mob_loot.tier.rare", ChatFormatting.AQUA)))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(
+                                    createSackTierScreen(config, mobId, drops.rare, "config.rpg_tweaks.mob_loot.tier.rare", ChatFormatting.AQUA));
+                        })
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.mob_loot.tier.epic").withStyle(ChatFormatting.LIGHT_PURPLE))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.tier.open_desc")))
                         .text(Component.literal(formatTierButton(drops.epic.chance)).withStyle(ChatFormatting.LIGHT_PURPLE))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(
-                                createSackTierScreen(config, mobId, drops.epic, "config.rpg_tweaks.mob_loot.tier.epic", ChatFormatting.LIGHT_PURPLE)))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(
+                                    createSackTierScreen(config, mobId, drops.epic, "config.rpg_tweaks.mob_loot.tier.epic", ChatFormatting.LIGHT_PURPLE));
+                        })
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.mob_loot.tier.legendary").withStyle(ChatFormatting.GOLD))
                         .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.tier.open_desc")))
                         .text(Component.literal(formatTierButton(drops.legendary.chance)).withStyle(ChatFormatting.GOLD))
-                        .action((screen, opt) -> net.minecraft.client.Minecraft.getInstance().setScreen(
-                                createSackTierScreen(config, mobId, drops.legendary, "config.rpg_tweaks.mob_loot.tier.legendary", ChatFormatting.GOLD)))
+                        .action((screen, opt) -> {
+                            ModConfig.save();
+                            net.minecraft.client.Minecraft.getInstance().setScreen(
+                                    createSackTierScreen(config, mobId, drops.legendary, "config.rpg_tweaks.mob_loot.tier.legendary", ChatFormatting.GOLD));
+                        })
                         .build())
                 .option(ButtonOption.createBuilder()
                         .name(Component.translatable("config.rpg_tweaks.option.manage_removed_drops").withStyle(ChatFormatting.YELLOW))
@@ -850,6 +864,43 @@ public class ModConfigScreen {
                         })
                         .build())
                 .build();
+    }
+
+    private static Screen createKillXPScreen(ModConfig config, String mobId, MobLootConfig.MobSackDrops drops) {
+        drops.ensureDefaults();
+        return YetAnotherConfigLib.createBuilder()
+                .title(Component.translatable("config.rpg_tweaks.add_mob_xp.title").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD))
+                .save(() -> {
+                    ModConfig.save();
+                    net.minecraft.client.Minecraft.getInstance().execute(() -> refreshScreen(5));
+                })
+                .category(ConfigCategory.createBuilder()
+                        .name(Component.translatable("config.rpg_tweaks.add_screen.category"))
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.mob_loot.xp_min").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.xp_min.desc")))
+                                .binding(drops.xpOnKill.minXP != null ? drops.xpOnKill.minXP : 0,
+                                        () -> drops.xpOnKill.minXP != null ? drops.xpOnKill.minXP : 0,
+                                        value -> drops.xpOnKill.minXP = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 500).step(1)
+                                        .formatValue(v -> v == 0
+                                                ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                                : Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
+                                .build())
+                        .option(Option.<Integer>createBuilder()
+                                .name(Component.translatable("config.rpg_tweaks.mob_loot.xp_max").withStyle(ChatFormatting.YELLOW))
+                                .description(OptionDescription.of(Component.translatable("config.rpg_tweaks.mob_loot.xp_max.desc")))
+                                .binding(drops.xpOnKill.maxXP != null ? drops.xpOnKill.maxXP : 0,
+                                        () -> drops.xpOnKill.maxXP != null ? drops.xpOnKill.maxXP : 0,
+                                        value -> drops.xpOnKill.maxXP = value)
+                                .controller(opt -> IntegerSliderControllerBuilder.create(opt).range(0, 500).step(1)
+                                        .formatValue(v -> v == 0
+                                                ? Component.translatable("config.rpg_tweaks.value.disabled").withStyle(ChatFormatting.GRAY)
+                                                : Component.translatable("config.rpg_tweaks.value.xp", v).withStyle(ChatFormatting.GOLD)))
+                                .build())
+                        .build())
+                .build()
+                .generateScreen(lastParent);
     }
 
     private static String formatTierButton(float chance) {
